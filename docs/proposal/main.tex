@@ -39,10 +39,15 @@ Expected implementation details ...
 % Large Language Models
 
 Knowledge distillation allows to obtain smaller models capable of successfully following the behavior of larger "teacher" models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). Some approaches to knowledge distillation include: \begin{itemize}
-    \item distillation of outputs
+    \item distillation of outputs, incl. CoT knowledge distillation, e.g. 
+    \begin{itemize}
+    \item self-consistency decoding: "The teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths, which can help the student model avoid common mistakes and output more consistent answers." 
+    \item intermediate answers: "Generate CoT reasoning outputs from a large teacher model on reasoning. The student model will be fine-tuned using these CoT responses to produce intermediate reasoning steps."
+    \end{itemize}
     \item distillation of features on intermediate layers 
-    \item CoT knowledge distillation \cite{shridhar2022distilling} 
-    \item \katja{it's a draft TODO: add info from Dasha's slides}
+    %\item CoT knowledge distillation \cite{shridhar2022distilling} 
+    \item teacher model to produce training data for student model: "Use the teacher model to generate correct reasoning paths and analyze where the student model diverges. Distill additional targeted knowledge by emphasizing examples where the student struggles, focusing on error types like logical consistency or arithmetic errors."
+    \item architecture-based distillation
 \end{itemize}
 Our goal is to test whether any of these techniques can be successfully used to obtain a model with scientific reasoning capabilities. 
 
