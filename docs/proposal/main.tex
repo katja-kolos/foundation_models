@@ -1,0 +1,80 @@
+%%%%%%%%%
+% Generic article template using additional packages for table formatting
+% New commands are defined for project participants: \katja, \flo, \dasha - 
+% to draw attention to important remarks directly in the text
+%%%%%%%%%
+
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+
+\newcommand{\katja}[1]{\textbf{\textcolor{teal}{(Katja) #1}}}
+\newcommand{\dasha}[1]{\textbf{\textcolor{brown}{(Dasha) #1}}}
+\newcommand{\flo}[1]{\textbf{\textcolor{red}{(Flo) #1}}}
+
+
+\begin{document}
+
+\title{Scientific Reasoning with LLMs}
+
+\author{Group ??: Florian \and Ekaterina Kolos \and Daria }
+
+\maketitle             
+
+
+\section{Introduction}
+
+Scientific machine reasoning is ... 
+
+For our project, we intend to ...
+
+Expected implementation details ...
+
+\section{Background and Related Work}
+% Large Language Models
+
+Knowledge distillation allows to obtain smaller models capable of successfully following the behavior of larger "teacher" models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). Some approaches to knowledge distillation include: \begin{itemize}
+    \item distillation of outputs
+    \item distillation of features on intermediate layers 
+    \item CoT knowledge distillation \cite{shridhar2022distilling} 
+    \item \katja{it's a draft TODO: add info from Dasha's slides}
+\end{itemize}
+Our goal is to test whether any of these techniques can be successfully used to obtain a model with scientific reasoning capabilities. 
+
+Agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}
+
+Prompting techniques \cite{schulhoff2024prompt}
+
+Scientific reasoning and the dataset \cite{lu2022learn}
+
+\section{Methodology}
+We postulate the following research questions: 
+RQ1: Can smaller student LLMs be still effective at few-shot prompting for scientific reasoning?
+RQ2: How does their performance compare with that of a teacher model?
+RQ3: 
+\paragraph{RQ1} 
+We plan to 
+
+\paragraph{RQ2}
+We plan to
+
+\paragraph{RQ3}
+We plan to
+
+\paragraph{Metrics}
+
+\section{Approximate Timeline}
+Maybe just a paragraph here
+
+
+\katja{Have reverted the doc to simple "article"}
+
+\bibliography{mybibliography}
+\bibliographystyle{plain}
+
+\end{document}
