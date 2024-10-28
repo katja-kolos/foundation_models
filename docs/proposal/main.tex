@@ -22,7 +22,9 @@
 
 \title{Scientific Reasoning with LLMs}
 
-\author{Group ??: Florian \and Ekaterina Kolos \and Daria }
+%we'll probably have a group number later
+%names are given in alphabetical order
+\author{Stuttgart Team: Florian Dreyer \and Ekaterina Kolos \and Daria Matyash}
 
 \maketitle             
 
@@ -38,13 +40,17 @@ Expected implementation details ...
 \section{Background and Related Work}
 % Large Language Models
 
-\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, while \cite{li2024turning} rely on negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy. Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to _response-based KD_ where the student model mimics the output of the teacher. More effective can be _feature-based KD_ where student also partially replicates the teacher on a feature-based level, when knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
+\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide on negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy  \cite{li2024turning}. Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to _response-based KD_ where the student model mimics the output of the teacher. More effective can be _feature-based KD_ where student also partially replicates the teacher on a feature-based level, when knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
 
 \katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
 
-Agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}
 
-Prompting techniques \cite{schulhoff2024prompt}
+\paragraph{Prompting techniques}. A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Chain-of-thought prompts result in better reasoning, with variations including self-ask, \cite{schulhoff2024prompt}. Furthermore, prompts can be compressed and automatically optimized to improve efficiency and reduce costs \cite{chang2024efficient}. \cite{ge2023context} compress a long context 4x into memory slots; \cite{zhou2022large} make an LLM generate various prompting instructions that are then tested by another LLM on 24 NLP tasks to chose the best one. 
+
+Hard prompts (discrete words of natural language) are opposed to soft prompts (learnable continuous representations). 
+
+Agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}
+Reasoning and Acting (ReAct) 
 
 Scientific reasoning and the dataset \cite{lu2022learn}
 
@@ -52,7 +58,7 @@ Scientific reasoning and the dataset \cite{lu2022learn}
 We postulate the following research questions: 
 RQ1: Can smaller student LLMs be still effective at few-shot prompting for scientific reasoning?
 RQ2: How does their performance compare with that of a teacher model?
-RQ3: 
+RQ3: Can an LLM-agent's behavior be distilled into a single model?
 \paragraph{RQ1} 
 We plan to 
 
