@@ -38,18 +38,9 @@ Expected implementation details ...
 \section{Background and Related Work}
 % Large Language Models
 
-Knowledge distillation allows to obtain smaller models capable of successfully following the behavior of larger "teacher" models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). Some approaches to knowledge distillation include: \begin{itemize}
-    \item distillation of outputs, incl. CoT knowledge distillation, e.g. 
-    \begin{itemize}
-    \item self-consistency decoding: "The teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths, which can help the student model avoid common mistakes and output more consistent answers." 
-    \item intermediate answers: "Generate CoT reasoning outputs from a large teacher model on reasoning. The student model will be fine-tuned using these CoT responses to produce intermediate reasoning steps."
-    \end{itemize}
-    \item distillation of features on intermediate layers 
-    %\item CoT knowledge distillation \cite{shridhar2022distilling} 
-    \item teacher model to produce training data for student model: "Use the teacher model to generate correct reasoning paths and analyze where the student model diverges. Distill additional targeted knowledge by emphasizing examples where the student struggles, focusing on error types like logical consistency or arithmetic errors."
-    \item architecture-based distillation
-\end{itemize}
-Our goal is to test whether any of these techniques can be successfully used to obtain a model with scientific reasoning capabilities. 
+\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, while \cite{li2024turning} rely on negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy. Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to _response-based KD_ where the student model mimics the output of the teacher. More effective can be _feature-based KD_ where student also partially replicates the teacher on a feature-based level, when knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
+
+\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
 
 Agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}
 
