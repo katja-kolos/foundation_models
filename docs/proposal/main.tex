@@ -71,7 +71,7 @@ We plan to
 We plan to
 
 \paragraph{RQ3}
-We plan to
+In order to distill the knowledge from the model fine-tuned in previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. The described approach can help the student model avoid common mistakes and output more consistent answers.
 
 \paragraph{Dataset}
 We plan to use the ScienceQA dataset. ScienceQA is a multimodal dataset containing science questions and their answers.
