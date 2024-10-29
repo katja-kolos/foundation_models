@@ -69,13 +69,13 @@ RQ3: Can an LLM-agent's behavior be distilled into a single model?
 We plan to 
 
 \paragraph{RQ2}
-We plan to use Soft Prompting on the LLM used to guide it towards better reasoning. 
+We plan to use Soft Prompting on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
 
 \paragraph{RQ3}
 In order to distill the knowledge from the obtained model previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. The described approach can help the student model avoid common mistakes and output more consistent answers.
 
 \paragraph{Dataset}
-We plan to use the ScienceQA dataset \cite{lu2022learn}. ScienceQA is a multimodal dataset containing science questions and their answers.
+We plan to use the ScienceQA dataset \cite{lu2022learn}. The dataset includes a variety of science-related multimodal multiple-choice questions together with annotations of the answers that provide relevant lectures and explanations in Nature Science, Language Science and Social Science.
 
 \paragraph{Metrics}
 We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. A few metrics used in machine translation such as BLEU-1, BLEU-4 and BERTScore can also be used, but the main metric we'll rely on is accuracy for question answering.
