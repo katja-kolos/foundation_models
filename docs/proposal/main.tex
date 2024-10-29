@@ -21,6 +21,9 @@
 \newcommand{\dasha}[1]{\textbf{\textcolor{brown}{(Dasha) #1}}}
 \newcommand{\flo}[1]{\textbf{\textcolor{red}{(Flo) #1}}}
 
+\bibliography{main}
+\usepackage[style=numeric, backend=biber]{biblatex}
+
 
 \begin{document}
 
@@ -98,7 +101,6 @@ We'll evaluate model's performance with question answering accuracy domain-wise 
 		\end{itemize}
 \end{enumerate}
 
-\bibliography{mybibliography}
-\bibliographystyle{plain}
+\printbibliography
 
 \end{document}
