@@ -80,7 +80,15 @@ We plan to use the ScienceQA dataset. ScienceQA is a multimodal dataset containi
 We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. A few metrics used in machine translation such as BLEU-1, BLEU-4 and BERTScore can also be used, but the main metric we'll rely on is accuracy for question answering.
 
 \section{Approximate Timeline}
-Maybe just a paragraph here
+-Now - mid November: 
+  Preliminary baseline tests: small LLM relying only on commonsense reasoning / only on pretraining 
+  zero-shot, few-shot
+  optional: stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask
+-mid November - mid December:
+  Construct agentic / RAG pipeline with “big smart” model + additional resources.
+  optional: soft-prompting for better workflow^ to distill from
+-mid December - mid January:
+  Knowledge distillation experiments.
 
 
 \katja{Have reverted the doc to simple "article"}
