@@ -5,7 +5,7 @@
 %%%%%%%%%
 
 \documentclass[10pt]{article}
-\usepackage[a4paper, margin=1.25in]{geometry}
+\usepackage[a4paper, margin=1.0in]{geometry}
 
 \usepackage{graphicx}
 \usepackage{multirow}
@@ -42,7 +42,7 @@ For our project, we intend to compare different approaches around generative lar
 \section{Background and Related Work}
 % Large Language Models
 
-\paragraph{Prompting techniques}. A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Of particular interest are small requirements on the reasoning process that can significantly improve performance when added to the prompt, such as 
+\paragraph{Prompting techniques} A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Of particular interest are small requirements on the reasoning process that can significantly improve performance when added to the prompt, such as 
 %"Rephrase and expand the question, and respond" \cite{}, or 
 "Let’s think step by step" \cite{kojima2022large}. 
 Chain-of-thought prompts improve reasoning capabilities by asking the model to speak its process of thinking out loud, with variations including self-ask, step-back prompting, thread-of-thought, least-to-most prompting (decomposing then solving), plan-and-solve prompting, tree-of-thought, recursion-of-thought and many more \cite{schulhoff2024prompt}. 
@@ -51,22 +51,21 @@ Furthermore, prompts themselves can be compressed and automatically optimized to
 
 Soft prompting is an alternative to fine-tuning where the model is frozen while only a small number of "soft" prompt parameters are trained \cite{lester2021prompt}. These parameters are used to guide the model in the right direction.
 
-\paragraph{Agents}. An important step forward in using LLMs are agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}. They allow the LLM to act as an intelligent being capable of planning a solution of a complex task, while resorting to external resources on the way to acquire in-context the knowledge it does not have from pre-training. The retrieved information, results of invoking tools, such as calculators, and of interactions with the environment are appended to the prompt (or, in a more advanced scenario, to the summarized memory). Optionally, a reflexion step (explicit reasoning on all the accumulated information) is added before allowing further generation of the final response. 
+\paragraph{Agents} An important step forward in using LLMs are agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}. They allow the LLM to act as an intelligent being capable of planning a solution of a complex task, while resorting to external resources on the way to acquire in-context the knowledge it does not have from pre-training. The retrieved information, results of invoking tools, such as calculators, and of interactions with the environment are appended to the prompt (or, in a more advanced scenario, to the summarized memory). Optionally, a reflexion step (explicit reasoning on all the accumulated information) is added before allowing further generation of the final response. 
 
 \paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide on negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy  \cite{li2024turning} (c.g. contrastive CoT). Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to \textit{response-based KD} where the student model mimics the output of the teacher. More effective can be \textit{feature-based KD} where student also partially replicates the teacher on a feature-based level, when knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
 
 This way, the student model learns the "protocols" of how to solve different problems, as well as the essence of the relevant knowledge selected by the teacher LLM. 
 %\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
 
-Scientific reasoning and the dataset \cite{lu2022learn}
-
 \section{Methodology}
 We postulate the following research questions: 
 RQ1: Can we build a LLM Agent to improve the LLMs performance on science questions?
 RQ2: Does Soft Prompting improve the performance of the LLM (Agent)?
 RQ3: Can an LLM-agent's behavior be distilled into a single model?
+
 \paragraph{RQ1} 
-We plan to 
+We plan to start by prompting a multimodal model with reasoning capabilities with a zero-shot and few-shot prompting settings. A foundation model for this step could be a T4/T5 model or a multimodal Llama model. This simple generation will be compared with an agent-based approach using the same model, which will now include augmented retrieval of information on the scientific task from domain-specific texts. 
 
 \paragraph{RQ2}
 We plan to use Soft Prompting on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
@@ -78,21 +77,26 @@ In order to distill the knowledge from the obtained model previous steps, we pla
 We plan to use the ScienceQA dataset \cite{lu2022learn}. The dataset includes a variety of science-related multimodal multiple-choice questions together with annotations of the answers that provide relevant lectures and explanations in Nature Science, Language Science and Social Science.
 
 \paragraph{Metrics}
-We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. A few metrics used in machine translation such as BLEU-1, BLEU-4 and BERTScore can also be used, but the main metric we'll rely on is accuracy for question answering.
+We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. A few metrics used in machine translation such as BLEU-1, BLEU-4 and BERTScore can also be used to evaluate the reasoning steps.
+%, but the main metric we'll rely on is accuracy for question answering.
 
 \section{Approximate Timeline}
--Now - mid November: 
-  Preliminary baseline tests: small LLM relying only on commonsense reasoning / only on pretraining 
-  zero-shot, few-shot
-  optional: stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask
--mid November - mid December:
-  Construct agentic / RAG pipeline with “big smart” model + additional resources.
-  optional: soft-prompting for better workflow^ to distill from
--mid December - mid January:
-  Knowledge distillation experiments.
-
-
-\katja{Have reverted the doc to simple "article"}
+\begin{enumerate}
+	\item \textbf{Now - mid November}: 
+		\begin{itemize}
+  			\item Preliminary baseline tests: small LLM relying only on commonsense reasoning / only on pretraining (zero-shot, few-shot).
+			\item Optional: stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask.
+		\end{itemize}
+	\item \textbf{mid November - mid December}:
+		\begin{itemize}
+  			\item Construct agentic / RAG pipeline with “big smart” model + additional resources.
+  			\item Optional: soft-prompting for better workflow to distill from.
+		\end{itemize}
+	\item \textbf{mid December - mid January}:
+  		\begin{itemize}
+			\item Knowledge distillation experiments.
+		\end{itemize}
+\end{enumerate}
 
 \bibliography{mybibliography}
 \bibliographystyle{plain}
