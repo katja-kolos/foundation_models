@@ -39,8 +39,6 @@ Scientific machine reasoning is the application of AI techniques to simulate sci
 
 For our project, we intend to compare different approaches around generative large language models to generate solutions for school science problems. On an existing benchmark with human solutions, we are planning to compare: a pure LLM with zero-shot and few-shot prompting (and possibly some more fine-grained prompting techniques), an agentic approach with ability to query external resources like textbooks in physics, maths etc, and soft-prompting techniques. We then plan to attempt knowledge distillation to a smaller LLM. 
 
-Expected implementation details ...
-
 \section{Background and Related Work}
 % Large Language Models
 
@@ -55,7 +53,8 @@ Soft prompting is an alternative to fine-tuning where the model is frozen while 
 
 \paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (running AI applications on mobile devices) and for cases where access to very large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide on negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy  \cite{li2024turning} (c.g. contrastive CoT). Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to \textit{response-based KD} where the student model mimics the output of the teacher. More effective can be \textit{feature-based KD} where student also partially replicates the teacher on a feature-based level, when knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
 
-\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
+This way, the student model learns the "protocols" of how to solve different problems, as well as the essence of the relevant knowledge selected by the teacher LLM. 
+%\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
 
 Agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}
 Reasoning and Acting (ReAct) 
