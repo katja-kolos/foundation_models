@@ -145,11 +145,11 @@ We'll evaluate model's performance with question answering accuracy domain-wise 
 We start by zero-shot benchmarking existing multimodal models in three simple prompt settings, partly repeating with the official evaluation suite:
 \begin{enumerate}
 	\item \textbf{question - choices - hint - image - task}, with the following prompt:
-	
+	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'}
 	\item \textbf{question - choices - hint - image - task + lecture}, with the following prompt:
-	
+	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n Lecture: {lecture}'}
 	\item \textbf{question - choices - hint - image - task + lecture + solution}, with the following prompt:
-	
+	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n Lecture: {lecture}\n Solution: {solution}'}	
 \end{enumerate}
 
 For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
