@@ -1,0 +1,181 @@
+%%%%%%%%%
+% Generic article template using additional packages for table formatting
+% New commands are defined for project participants: \katja, \flo, \dasha - 
+% to draw attention to important remarks directly in the text
+%%%%%%%%%
+
+\documentclass[10pt]{article}
+\usepackage[a4paper, margin=.90in]{geometry}
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{*0.8}{*0.8}
+
+\newcommand{\katja}[1]{\textbf{\textcolor{teal}{(Katja) #1}}}
+\newcommand{\dasha}[1]{\textbf{\textcolor{brown}{(Dasha) #1}}}
+\newcommand{\flo}[1]{\textbf{\textcolor{red}{(Flo) #1}}}
+
+\bibliography{main}
+\usepackage[style=numeric, backend=biber]{biblatex}
+
+
+\begin{document}
+
+\title{Scientific Reasoning with LLMs}
+
+%we'll probably have a group number later
+%names are given in alphabetical order
+\author{Stuttgart Team: Florian Dreyer (3667877) \and Ekaterina Kolos (3688474) \and Daria Matiash (3668740)}
+
+\maketitle             
+
+
+\section{Introduction}
+
+Scientific machine reasoning is the application of AI techniques to simulate scientific reasoning processes, such as  data interpretation, hypothesis generation, and causal inference. It facilitates scientific inquiry and discovery by enabling machines to independently analyze scientific data, generate hypotheses, and make predictions.
+For our project, we intend to compare different approaches around generative large language models to generate solutions for school science problems. On an existing benchmark with human solutions, we are planning to compare: a pure LLM with zero-shot and few-shot prompting (and possibly some more fine-grained prompting techniques), an agentic approach with ability to query external resources like textbooks in physics, maths etc, and soft-prompting techniques. We then plan to attempt knowledge distillation to a smaller LLM. 
+
+\section{Background and Related Work}
+% Large Language Models
+
+\paragraph{Prompting techniques} A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Of particular interest are small requirements on the reasoning process that can significantly improve performance when added to the prompt, such as 
+%"Rephrase and expand the question, and respond" \cite{}, or 
+"Let’s think step by step" \cite{kojima2022large}. 
+Chain-of-thought prompts improve reasoning capabilities by asking the model to speak its process of thinking out loud, with variations including self-ask, step-back prompting, thread-of-thought, least-to-most prompting (decomposing then solving), plan-and-solve prompting, tree-of-thought, recursion-of-thought and many more \cite{schulhoff2024prompt}. 
+%with the resulting systems possibly using multiple CoT reasoning trajectories to select the most likely one (e.g. Uncertainty-Routed CoT Prompting, or making an LLM generate various prompting instructions that are then tested by another LLM on 24 NLP tasks to chose the best one \cite{zhou2022large}). %katja: I omit this to save space as not directly relevant
+%Furthermore, prompts themselves can be compressed and automatically optimized to improve efficiency and reduce costs \cite{chang2024efficient}. \cite{ge2023context} compress a long context 4x into memory slots, while \cite{weston2023system} ask the LLM to first summarize the prompt and then execute it. Self-criticism and ensembling techniques can further be used to improve reasoning capabilities \cite{schulhoff2024prompt}. 
+Soft prompting is an alternative to fine-tuning where the model is frozen while only a small number of "soft" prompt parameters are trained \cite{lester2021prompt}. These parameters are used to guide the model in the right direction.
+
+\paragraph{Agents} An important step forward in using LLMs are agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}. They allow the LLM to act as an intelligent being capable of planning a solution of a complex task, while resorting to external resources on the way to acquire in-context the knowledge it does not have from pre-training. The retrieved information, results of invoking tools, such as calculators, and of interactions with the environment are appended to the prompt (or, in a more advanced scenario, to the summarized memory \cite{ge2023context}). Optionally, a reflexion step (explicit reasoning on all the accumulated information) is added before allowing further generation of the final response. 
+
+\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (mobile AI apps) and when access to large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy \cite{li2024turning} (c.f. contrastive CoT). Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to \textit{response-based KD} where the student model mimics the output of the teacher. Alternatively, with \textit{feature-based KD} the knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
+
+In our project, we plan to develop an extended version of CoT knowledge distillation, where both the reasoning paths and the essence of the external knowledge the teacher agent has retrieved for the tasks are acting as training data for the student model. This way the teacher agent "defines" the "protocols" of solving complex tasks, while the student model tries to "follow" the learnt "instructions" and memorize important information for similar tasks. If we succeed, such small models could be a valuable asset in practice in enterprise environments, to encode important protocols and parts of project documentation, replacing expensive intelligent agents for specific tasks. 
+
+%\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
+
+\section{Methodology}
+We postulate the following research questions: 
+RQ1: Can we build a LLM agent to improve the LLMs performance on science problems?
+RQ2: Does Soft Prompting improve the performance of the LLM (agent)?
+RQ3: Can an LLM agent's behavior be distilled into a single model?
+
+\paragraph{RQ1} 
+We plan to start by prompting a multimodal model with reasoning capabilities with a zero-shot and few-shot prompting settings. Preliminary list of foundation models to be compared as baselines is: CLIP, GPT4o (GPT4-V), T5, BigGAN, Gemini; small models: TinyCLIP, T5-Small; Llama models. This simple generation will be compared with an agent-based approach using the same models, which will now include augmented retrieval of information on the scientific task from domain-specific texts. 
+
+\paragraph{RQ2}
+We plan to use Soft Prompting as one of the parameter-efficient fine-tuning techniques on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
+
+\paragraph{RQ3}
+In order to distill the knowledge from the system obtained at previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses together with any additional information the agent has retrieved from external sources to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. 
+The foundation model to serve as student LLM should be small, multimodal, capable of reasoning and capable of acquiring new distilled knowledge. A preliminary list of candidate models: small Llama and LLaVA models, MiniGPT-4, small FLAVA models, distilUNITER, lxmert, distilled ViLT.
+%The described approach can help the student model avoid common mistakes and output more consistent answers.
+
+\section{Dataset}
+This study is based on the ScienceQA dataset \cite{lu2022learn}. The dataset includes a variety of science-related multimodal multiple-choice questions together with annotations of the answers that provide relevant lectures and explanations in Nature Science, Language Science and Social Science.
+
+Data points are structured as follows:
+\begin{verbatim}
+{'image': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=200x202>,
+ 'question': 'Is diorite a mineral or a rock?',
+ 'choices': ['rock', 'mineral'],
+ 'answer': 0,
+ 'hint': 'Diorite has the following properties:\nno fixed crystal structure\nnaturally occurring\nnot a pure substance\ncoarse-grained texture\nsolid\nnot made by organisms',
+ 'task': 'closed choice',
+ 'grade': 'grade8',
+ 'subject': 'natural science',
+ 'topic': 'earth-science',
+ 'category': 'Rocks and minerals',
+ 'skill': 'Identify rocks and minerals',
+ 'lecture': 'Minerals are the building blocks of rocks. A rock can be made of one or more minerals.\nMinerals and rocks have the following properties:\nProperty | Mineral | Rock\nIt is a solid. | Yes | Yes\nIt is formed in nature. | Yes | Yes\nIt is not made by organisms. | Yes | Yes\nIt is a pure substance. | Yes | No\nIt has a fixed crystal structure. | Yes | No\nYou can use these properties to tell whether a substance is a mineral, a rock, or neither.\nLook closely at the last three properties:\nMinerals and rocks are not made by organisms.\nOrganisms make their own body parts. For example, snails and clams make their shells. Because they are made by organisms, body parts cannot be  minerals or rocks.\nHumans are organisms too. So, substances that humans make by hand or in factories are not minerals or rocks.\nA mineral is a pure substance, but a rock is not.\nA pure substance is made of only one type of matter.  Minerals are pure substances, but rocks are not. Instead, all rocks are mixtures.\nA mineral has a fixed crystal structure, but a rock does not.\nThe crystal structure of a substance tells you how the atoms or molecules in the substance are arranged. Different types of minerals have different crystal structures, but all minerals have a fixed crystal structure. This means that the atoms and molecules in different pieces of the same type of mineral are always arranged the same way.\nHowever, rocks do not have a fixed crystal structure. So, the arrangement of atoms or molecules in different pieces of the same type of rock may be different!',
+ 'solution': 'The properties of diorite match the properties of a rock. So, diorite is a rock.'}
+\end{verbatim}
+
+For some datapoints, the image data is missing, while the answer can be deduced from text alone (e.g. questions on 'subject': 'language science', 'topic': 'figurative-language', 'skill': 'Interpret figures of speech' (e.g. irony recognition). 
+
+For other datapoints, however, the image data can be missing, although required to make an answer, e.g.
+\begin{verbatim}
+{'image': None,
+ 'question': 'What information supports the conclusion that Rick inherited this trait?',
+ 'choices': ["Rick's coworker also has curly hair.",
+  "Rick's biological father has curly hair.",
+  'Rick and his biological parents have brown hair.'],
+ 'answer': 1,
+ 'hint': 'Read the description of a trait.\nRick has curly hair.',
+ 'task': 'closed choice',
+ 'grade': 'grade7',
+ 'subject': 'natural science',
+ 'topic': 'biology',
+ 'category': 'Genes to traits',
+ 'skill': 'Inherited and acquired traits: use evidence to support a statement',
+ 'lecture': "Organisms, including people, have both inherited and acquired traits. Inherited and acquired traits are gained in different ways.\nInherited traits are passed down from biological parents to their offspring through genes. Genes are pieces of hereditary material that contain the instructions that affect inherited traits. Offspring receive their genes, and therefore gain their inherited traits, from their biological parents. Inherited traits do not need to be learned.\nAcquired traits are gained during a person's life. Some acquired traits, such as riding a bicycle, are gained by learning. Other acquired traits, such as scars, are caused by the environment. Parents do not pass acquired traits down to their offspring.",
+ 'solution': ''}
+\end{verbatim}
+
+Apart from the image field, missing values can occur in lecture and solution fields. The statistics in table \ref{table:dataset-stats} give an overview on the amount of problematic datapoints. 
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ll}\toprule
+	missing & frequency \\\midrule
+	solution & 9.3\% \\
+	lecture & 15.7\% \\
+	solution and/or lecture & 24.2\% \\
+	image & 50.6\%\\\bottomrule
+\end{tabular}
+\caption{Defect datapoints in dataset}
+\label{table:dataset-stats}
+\end{table}
+
+\paragraph{Retained data} As 50.6\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
+For now, we will only work with datapoints with non-empty solution AND with non-empty lecture. All the other datapoints are disregarded.  
+
+\paragraph{Metrics}
+We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
+%, but the main metric we'll rely on is accuracy for question answering.
+
+\section{Experiments}
+\subsection{Zero-shot and Few-shot Benchmarking}
+We start by zero-shot benchmarking existing multimodal models in three simple prompt settings, partly repeating with the official evaluation suite:
+\begin{enumerate}
+	\item \textbf{question - choices - hint - image - task}, with the following prompt:
+	
+	\item \textbf{question - choices - hint - image - task + lecture}, with the following prompt:
+	
+	\item \textbf{question - choices - hint - image - task + lecture + solution}, with the following prompt:
+	
+\end{enumerate}
+
+For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
+
+We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: list models. 
+
+The metrics used for evaluation at this point are: accuracy, \texttt{BLEU-1}, \texttt{BLEU-4}, \texttt{ROUGE}, similarity. 
+
+\section{Approximate Timeline}
+\begin{enumerate}
+	\item \textbf{Now - mid November}: 
+		\begin{itemize}
+  			\item Preliminary baseline tests: compare "pure LLM"s relying only on commonsense reasoning / only on pretraining (zero-shot, few-shot).
+			\item Stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask.
+		\end{itemize}
+	\item \textbf{mid November - mid December}:
+		\begin{itemize}
+  			\item Construct agentic / RAG pipeline with “big smart” model + additional resources.
+  			\item Optional: soft-prompting for better workflow to distill from.
+		\end{itemize}
+	\item \textbf{mid December - mid January}:
+  		\begin{itemize}
+			\item Knowledge distillation experiments.
+		\end{itemize}
+\end{enumerate}
+
+\printbibliography
+
+\end{document}
