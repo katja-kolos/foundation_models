@@ -12,6 +12,7 @@ def eval(RES_DIR:str, MODEL_NAME:str):
         df = pd.read_excel("../res/see.xlsx")
         answer_pred_col, solution_pred_col = "answer_output", "solution_output"
         df[[answer_pred_col, solution_pred_col]] = df["output"].apply(string2json).apply(pd.Series)
+        df[answer_pred_col] = df[answer_pred_col].apply(lambda x: int(x))
         answer_preds = df[answer_pred_col].tolist()
         solution_preds =  df[solution_pred_col].tolist()
         scores = get_scores(df)
