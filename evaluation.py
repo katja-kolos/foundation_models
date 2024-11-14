@@ -19,8 +19,10 @@ def eval(RES_DIR:str, MODEL_NAME:str):
         print_scores(scores)
         metrics = calculate_metrics_solutions(solution_preds , df)
         scores.update(metrics)
-        df_save = pd.DataFrame(scores)
-        df_save.to_csv(f"{RES_DIR}/{MODEL_NAME}_val_metrics.csv", sep="\t", encoding="utf-8")
+        dict_save = {'model': MODEL_NAME, 'setting': SETTING_NUM}
+        dict_save.update(scores)
+        df_save = pd.DataFrame(dict_save)
+        df_save.to_csv(f"{RES_DIR}/{MODEL_NAME}_val_metrics_setting_{i}.csv", sep="\t", encoding="utf-8")
        
 
 def string2json(text):
