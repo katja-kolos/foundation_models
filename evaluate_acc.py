@@ -20,7 +20,6 @@ def get_acc_with_contion(res_pd, key, values):
 
 
 def get_scores(res_pd):
-    num = res_pd.shape[0]
     for index, row in res_pd.iterrows():
         print(index)
         res_pd.loc[index, 'no_context'] = True if (not row['hint'] and not row['image']) else False
