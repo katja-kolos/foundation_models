@@ -7,12 +7,14 @@ Note: This output was generated in 3 runs because of memory limits of the MacBoo
 	- rows 0 - 1613 rows of filtered_validation_data, QTCHLS
 	- rows 0 - 1613 rows of filtered_validation_data, QTCHS
 - run 2:
-	- rows 1615 - 3216 of filtered_validation_data, QTCH
-	- rows 1615 - 3216 of filtered_validation_data, QTCHL
-	- rows 1614 - 3216 of filtered_validation_data, QTCHLS
+	- rows 1615 - 3214 of filtered_validation_data, QTCH
+	- rows 1615 - 3214 of filtered_validation_data, QTCHL
+	- rows 1614 - 3214 of filtered_validation_data, QTCHLS
 	- rows 1614 - 1911 of filtered_validation_data, QTCHS
 - run 3:
-	- rows 1912 - 3216 of filtered_validation_data, QTCHS
+	- rows 1912 - 3214 of filtered_validation_data, QTCHS
+- run 4:
+	- row 3215 of filtered_validation_data, all settings
 
 The model used is LLaVA1.5-7b from huggingface: `llava-hf/llava-1.5-7b-hf`
 
