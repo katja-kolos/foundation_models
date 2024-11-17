@@ -120,6 +120,8 @@ For other datapoints, however, the image data can be missing, although required 
 
 Apart from the image field, missing values can occur in lecture and solution fields. The statistics in table \ref{table:dataset-stats} give an overview on the amount of problematic datapoints. 
 
+Finally, hint can be missing, e.g. the text-only task 367 on subject language science: "What is the source of allusion in the sentence below? Edward picked up his pace on the trail as his spidey sense began to tingle" with choices ["Italian history", "a comic book"], or the text-only task 3 on the topic of capitalization: "Which correctly shows the title of a play?" with choices ["A breath of Fresh Air", "A Breath of Fresh Air"]. 
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{ll}\toprule
@@ -134,7 +136,11 @@ Apart from the image field, missing values can occur in lecture and solution fie
 \end{table}
 
 \paragraph{Retained data} As 50.6\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
-For now, we will only work with datapoints with non-empty solution AND with non-empty lecture. All the other datapoints are disregarded.  
+For now, we will only work with datapoints with non-empty solution AND with non-empty lecture. All the other datapoints are disregarded,
+%\begin{verbatim}
+%filtered\_validation\_data = validation\_data.filter(lambda example: example["lecture"] != "" and example["solution"] != "")
+%\end{verbatim}
+which results in \textbf{3216} datapoints kept in validation data.  
 
 \paragraph{Metrics}
 We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
@@ -145,16 +151,70 @@ We'll evaluate model's performance with question answering accuracy domain-wise 
 We start by zero-shot benchmarking existing multimodal models in three simple prompt settings, partly repeating with the official evaluation suite:
 \begin{enumerate}
 	\item \textbf{question - choices - hint - image - task}, with the following prompt:
-	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'}
+	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'}\end{verbatim}
 	\item \textbf{question - choices - hint - image - task + lecture}, with the following prompt:
-	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n Lecture: {lecture}'}
+	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n 
+	Lecture: {lecture}'}\end{verbatim}
 	\item \textbf{question - choices - hint - image - task + lecture + solution}, with the following prompt:
-	\texttt{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n Lecture: {lecture}\n Solution: {solution}'}	
+	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n 
+	Lecture: {lecture}\n Solution: {solution}'}\end{verbatim}
 \end{enumerate}
 
 For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
 
 We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: list models. 
+
+\subsubsection{Local Models from HuggingFace}
+
+\paragraph{Pre-experiments} We were not successful with processing with small non-chat models. For the given text + image, the models would return short non-meaningful answers, like "Yes" to a "X or Y" question, or "no idea" to a completely defined task with all relevant context included. These were multimodal models below 1B on Huggingface, not tuned to be used in a chat scenario (and prepending a "You are a helpful assistant..." to the beginning of the prompt was not enough to fix this). 
+We are not sure how to use those models for our purposes as of now. 
+
+\paragraph{MiniGPT-4} This is a small multimodal model designed from ?? \cite{zhu2023minigpt}. It offers to build the model based on Llama or Vicuna. 
+\textbf{Unsuccessful experiment}: We tried to resort to an unofficial implementation: \texttt{wangrongsheng/MiniGPT-4-LLaMA-7B}. Loading the model was not successful (no preprocessor\_config.json). 
+Another issue: using BlipForConditionalGeneration and BlipProcessor: "You are using a model of type llama to instantiate a model of type blip. This is not supported for all configurations of models and can yield errors.". Model size: ~10GB. Processor: ~3.6GB. 
+
+\paragraph{LLaVa} The exact model used is: \texttt{llava-hf/llava-1.5-7b-hf} (and there is a larger sister 13b model). It is based on LLaMA and (?) Vicuna fine-tuned on GPT-generated multimodal instruction-following data.
+It expects inputs as conversation, allowing the preprocessor to convert textual input into format "USER: {request} ASSISTANT: " where the assistant has to fill in the rest. 
+We encountered the following issues while applying this model version on ScienceQA data: 
+\begin{itemize}
+	\item although prompted like larger models, this model returned answer strings and not choice index; this may additionally raise an issue of the returned answer not being entirely part of the choice list;
+	\item although prompted to generate JSON, the model would sometimes generate a different string, e.g. simply repeating part of the task. Unexpected format happened in ?? \% of all answers. We disregarded these answers, considering them all wrong, which results in a bit more pessimistic estimation of the model's performance. The metrics on the correctly formatted answers alone are also given. 
+	\item the model currently does not accept inputs without an image (text-only); according to a huggingface discussion\footnote{https://huggingface.co/llava-hf/llava-1.5-7b-hf/discussions/38}, the authors claim to have accidentally removed this possibility in a recent update. We worked around this by producing placeholder empty 10x10 white images and passing them as part of the input when the image in the dataset was missing. We also appended the suffix "Ignore image" to the end of the prompt, because the model would otherwise try to hallucinate a relation between the text and the image (e.g. "Why is the sky blue" + placeholder image results in "The sky is blue on the picture because ...");
+	\item the model does not really seem to support batch processing; although officially the technical possibility exists, it has been reported online \footnote{https://huggingface.co/llava-hf/llava-1.5-13b-hf/discussions/10} that the model would only take into account the first image in the batch, which makes the processing useless. We did not risk to attempt the supported or custom batching and processed the filtered validation dataset 1 datapoint by 1, which took 10+ hours on GPU for inference. 
+\end{itemize}
+
+There is another available model LLaVANext, which recently started to support batching, and should have better performance. 
+%Issues: https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf/discussions/34 
+
+
+Note: I later (after running the model) understood that the original model is this one: `liuhaotian/llava-v1.5-7b`. The results may thus be different from what would be expected from the model's paper. 
+
+
+\paragraph{BLIP-2}
+
+\paragraph{LLaMA models}
+ 
+\paragraph{Gemma2}
+
+\paragraph{Qwen models} e.g.  Qwen2.5-Coder
+
+\paragraph{}
+ 
+\begin{table}
+\centering
+\begin{tabular}{rcc}
+	\toprule
+	Model name & llava-1.5-7b-hf & \\
+	Size & 7B & \\
+	Published & 09.2023 & \\
+	Type & SLM & \\
+	Chat model & yes & \\
+	Parent models & LLaMA, Vicuna & \\
+	Data & GPT-generated multimodal instruction-following data & \\
+	\bottomrule
+\end{tabular}
+\caption{Model Comparison: Benchmarked Models}
+\end{table}
 
 The metrics used for evaluation at this point are: accuracy, \texttt{BLEU-1}, \texttt{BLEU-4}, \texttt{ROUGE}, similarity. 
 

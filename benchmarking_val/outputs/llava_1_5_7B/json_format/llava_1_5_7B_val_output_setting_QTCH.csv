@@ -1,25 +1,4 @@
 "idx"	"input"	"output"	"subject"
-0	"Question: What does the verbal irony in this text suggest?
-According to Mr. Herrera's kids, his snoring is as quiet as a jackhammer.
- Task: closed choice
- Choices: ['The snoring is loud.', 'The snoring occurs in bursts.']
- Hint: 
- Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	" {
-""answer"": ""The snoring is loud."",
-""solution"": ""The verbal irony in the text suggests that the snoring is not quiet, as the children claim it to be. It implies that the snoring is actually loud, contrary to what the children believe.""
-}"	language science
-1	"Question: Which animal's mouth is also adapted for bottom feeding?
- Task: closed choice
- Choices: ['discus', 'armored catfish']
- Hint: Sturgeons eat invertebrates, plants, and small fish. They are bottom feeders. Bottom feeders find their food at the bottom of rivers, lakes, and the ocean.
-The 's mouth is located on the underside of its head and points downward. Its mouth is adapted for bottom feeding.
-Figure: sturgeon.
- Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	" {
-""answer"": ""sturgeon"",
-""solution"": ""Sturgeons eat invertebrates, plants, and small fish. They are bottom feeders. Bottom feeders find their food at the bottom of rivers, lakes, and the ocean. The 's mouth is located on the underside of its head and points downward. Its mouth is adapted for bottom feeding.""
-}"	natural science
 "0"	"Question: What does the verbal irony in this text suggest?
 According to Mr. Herrera's kids, his snoring is as quiet as a jackhammer.
  Task: closed choice
@@ -29775,3 +29754,13 @@ Please output the answer in JSON style with an answer and a solution field"	" {
 ""answer"": ""Europe"",
 ""solution"": ""The continent highlighted is Europe.""
 }"	"social science"
+"3215"	"Question: What kind of sentence is this?
+Give Daniel a tour of the building and then take him to Mr. Carlson's office.
+ Task: closed choice
+ Choices: ['exclamatory', 'interrogative', 'imperative']
+ Hint: 
+ Instruction: 
+Please output the answer in JSON style with an answer and a solution field"	" {
+""answer"": ""interrogative"",
+""solution"": ""This is an interrogative sentence, which is used to ask a question. In this case, the sentence is asking for a tour of the building and then taking someone to Mr. Carlson's office.""
+}"	"language science"
