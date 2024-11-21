@@ -147,6 +147,7 @@ We'll evaluate model's performance with question answering accuracy domain-wise 
 %, but the main metric we'll rely on is accuracy for question answering.
 
 \section{Experiments}
+
 \subsection{Zero-shot and Few-shot Benchmarking}
 We start by zero-shot benchmarking existing multimodal models in three simple prompt settings, partly repeating with the official evaluation suite:
 \begin{enumerate}
@@ -163,6 +164,31 @@ We start by zero-shot benchmarking existing multimodal models in three simple pr
 For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
 
 We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: list models. 
+
+\section{Benchmark}
+% description of metrics, why they were used + analytics of results
+\subsection{Accuracy}
+The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. `GPT-4` consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The `LLaVAModel1.5-7b`, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
+
+\subsection{Cosine similarity}
+\subsection{BLEU-1}
+Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `GPT-4o-mini` model demonstrated superior performance, surpassing `GPT-4`, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly `LLaVAModel1.5-7b`, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
+
+\subsection{BLEU-4}
+Scores were consistently higher in settings 3 and 4, particularly for  models, demonstrating their ability to produce more contextually precise outputs when both lecture and solution information were provided. Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. `LlaVAModel`, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
+
+
+\subsection{ROUGE}
+The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  `LlaVAModel` anf `GPT-4` had highest ROUGE-scores on settings without solutions. Outputs of `GPT-4` without knowledge of the correct answer had higher ROUGE score than `GPT-4o-mini` given solutions in the input.
+
+
+\subsection{Cosine similarity}
+Semantic alignment with the reference is assessed by the similarity metric. Gemini and its variants outperformed other models, demonstrating their great capacity to capture the semantic structure of enriched input. Similarity scores were highest in settings 3 and 4. LLaVAModel1.5-7b, on the other hand, received the lowest score in setting 1, indicating that it mostly depends on lecture or solution data to generate outputs that are semantically accurate. This result emphasises how more data affects the resulting content's semantic integrity. `GPT-4o-mini` and `LLaVAModel` performed better than other models in environments lacking solution information, indicating that they can produce reliable results even with limited  contextual guidance.
+
+\subsection{Summary}
+Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The GPT-4o-mini model outperformed GPT-4 in multiple instances, indicating the efficacy of smaller, more targeted designs, even if GPT-4 continuously received excellent accuracy and informativeness scores. While LLaVAModel1.5-7b failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
+Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers.
+
 
 \subsubsection{Local Models from HuggingFace}
 
