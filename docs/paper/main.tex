@@ -144,6 +144,15 @@ which results in \textbf{3216} datapoints kept in validation data.
 
 \paragraph{Metrics}
 We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
+\subsection{Multiple choice Evaluation}
+Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. This metric is considered of the highest importantce 
+\subsection{Answer Reasoning Evaluation}
+Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
+\subsubsubsection{BLEU}
+
+\subsubsubsection{ROUGE}
+\subsubsubsection{METEOR}
+
 %, but the main metric we'll rely on is accuracy for question answering.
 
 \section{Experiments}
