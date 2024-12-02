@@ -609,7 +609,7 @@ Solution: Read the text carefully.
 It got down to 3°C in Athens, Greece, last night!
 This passage tells you about the temperature in Athens last night. It describes the atmosphere at a certain place and time. So, this passage describes the weather.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "40"	"Question: Select the bird below.
  Task: closed choice
  Choices: ['gray tree frog', 'pelican']
@@ -2043,7 +2043,7 @@ Solution: The source of the allusion Peter Pan is literature.
 In a J. M. Barrie novel, the character Peter Pan retreats to Neverland and refuses to grow up.
 The allusion Peter Pan means a person who won't take on adult responsibilities.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "124"	"Question: Which is harder?
  Task: closed choice
  Choices: ['ceramic mug', 'cotton apron']
@@ -2144,7 +2144,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
 Solution: Like other spiders, a leaf-curling spider does not have a backbone. It has a hard outer cover.
 A salmon is a fish. Like other fish, a salmon has a backbone.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "132"	"Question: Select the one animal that has all of the bird traits listed above.
  Task: closed choice
  Choices: ['Chinese alligators live in lakes and streams in eastern China. They lay eggs with shells and live in underground burrows in the winter. Chinese alligators have scaly, waterproof skin.', 'Blue-footed boobies live on tropical islands in the Pacific Ocean. They have two wings, feathers, and a beak. Blue-footed boobies lay eggs with pale blue shells. They keep the eggs warm with their large blue feet.']
@@ -2319,7 +2319,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
 Roxie, a Labrador retriever from this group, has black fur. Roxie has two alleles for black fur. 
 Solution: An organism's phenotype for a trait is its observable version of that trait. Roxie's observable version of the fur color trait is black fur. So, Roxie's phenotype for the fur color trait is black fur.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "144"	"Question: Select the invertebrate.
  Task: closed choice
  Choices: ['macaw', 'domestic pig', 'giant wood wasp', 'tokay gecko']
@@ -3357,7 +3357,7 @@ The first text uses literally in its nontraditional sense: nearly or in effect (
 The curry that the chef prepared was so spicy that Julian's mouth was literally on fire by the time he finished his meal.
 Most style guides recommend to avoid using the nontraditional sense of the word literally because it is generally considered incorrect.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "218"	"Question: Which bird's beak is also adapted to get nectar out of long flowers?
  Task: closed choice
  Choices: ['snowy owl', 'violet sabrewing']
@@ -3762,7 +3762,7 @@ Jerry has five toes on each foot.
  Hint: Hint: Jerry was born with five toes on each foot. 
 Solution: Most humans are born with five toes on each foot. So, having five toes is an inherited trait.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "249"	"Question: Which word would you find on a dictionary page with the following guide words?
 shy - spool
  Task: closed choice
@@ -4197,7 +4197,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
  Hint:  
 Solution: When four men's clothing stores closed on Main Street, the number of suppliers went down. There were fewer stores selling men's shirts. So, the supply of men's shirts probably went down.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"social science"
+Please output the answer in JSON style with an answer and a solution field"	""	"social science"
 "282"	"Question: Complete the statement. Assume that the motorcycle's mass did not change.
 The gravitational potential energy stored between the motorcycle and Earth () as Emmett rode up the hill.
  Task: closed choice
@@ -5518,7 +5518,7 @@ Solution: The source of the allusion Trojan horse is Greek mythology.
 In Greek mythology, the Greek army tricks the Trojan army into taking a large wooden horse into their carefully guarded city. The horse turns out to be filled with Greek warriors who, once inside the city of Troy, open the gates to the Greek army waiting outside.
 The allusion Trojan horse means a deceptive or harmful offering.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "380"	"Question: Which text uses the word ironic in its traditional sense?
  Task: closed choice
  Choices: [""Last winter, Henry took a vacation to Florida to escape Boston's cold, snowy weather. In an ironic twist, a rare snowstorm happened to hit Florida that week."", ""Last winter, Henry took a vacation to Florida to escape Boston's cold, snowy weather. In an ironic twist, he just missed a few of his college friends, who had been in Florida the previous week.""]
@@ -6491,7 +6491,7 @@ The text tells you that a barrel cactus is a producer that uses energy from sunl
 This organism is not photosynthetic:
 The text does not provide evidence that the crown-of-thorns starfish is photosynthetic.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "443"	"Question: Which material is this magnifying glass made of?
  Task: closed choice
  Choices: ['linen', 'plastic']
@@ -6854,7 +6854,7 @@ Charlie can ride a motorcycle.
  Hint: Hint: Riding a motorcycle well takes practice. 
 Solution: People are not born knowing how to ride a motorcycle. Instead, many people learn how to ride. So, riding a motorcycle is an acquired trait.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "471"	"Question: Would you find the word clutch on a dictionary page with the following guide words?
 criticism - cultivate
  Task: yes or no
@@ -7761,7 +7761,7 @@ Although Gary hasn't worked in years, his mother prefers to say that he's betwee
 Solution: The text uses a euphemism, a polite or indirect expression that is used to de-emphasize an unpleasant topic.
 Between jobs is an indirect way of saying unemployed.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "539"	"Question: What is the volume of a large trash can?
  Task: closed choice
  Choices: ['20 cups', '20 fluid ounces', '20 gallons']
@@ -9027,7 +9027,7 @@ Water evaporating is caused by heating. But ice crystals forming on a window is 
 Both are caused by cooling.
 Ice crystals form on a window when water vapor in the air becomes ice. This is caused by cooling. But water evaporating from a lake is not.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "632"	"Question: Based on this information, what is Lady's phenotype for the coat color trait?
  Task: closed choice
  Choices: ['a reddish-brown coat', 'a black coat']
@@ -9881,7 +9881,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
  Hint:  
 Solution: When four men's clothing stores closed on Main Street, the number of suppliers went down. There were fewer stores selling men's shirts. So, the supply of men's shirts probably went down.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"social science"
+Please output the answer in JSON style with an answer and a solution field"	""	"social science"
 "678"	"Question: Think about the magnetic force between the magnets in each pair. Which of the following statements is true?
  Task: closed choice
  Choices: ['The magnitude of the magnetic force is greater in Pair 1.', 'The magnitude of the magnetic force is greater in Pair 2.', 'The magnitude of the magnetic force is the same in both pairs.']
@@ -11689,7 +11689,7 @@ Since it takes approximately one thousand years for a used printer cartridge to 
 Solution: The sentence is complex. It is made up of an independent clause and a dependent clause. The dependent clause begins with the subordinating conjunction since.
 Since it takes approximately one thousand years for a used printer cartridge to decompose, recycling these plastic ink dispensers helps the environment.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "803"	"Question: Think about the magnetic force between the magnets in each pair. Which of the following statements is true?
  Task: closed choice
  Choices: ['The magnitude of the magnetic force is the same in both pairs.', 'The magnitude of the magnetic force is greater in Pair 1.', 'The magnitude of the magnetic force is greater in Pair 2.']
@@ -12794,7 +12794,7 @@ Solution: Salem's genotype for the agouti fur gene is aa. Salem's genotype of aa
 To check this answer, consider whether Salem's alleles are dominant or recessive. The allele for not having agouti fur (a) is recessive to the allele for having agouti fur (A). This means A is a dominant allele, and a is a recessive allele.
 Salem's genotype of aa has only recessive alleles. An organism with only recessive alleles for a gene will have the recessive allele's version of the trait. So, Salem's phenotype for the agouti fur trait must be not having agouti fur.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "887"	"Question: Which i in row C?
  Task: closed choice
  Choices: ['the police department', 'the fire department', 'the fast-food restaurant', 'the grocery store']
@@ -13244,7 +13244,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
 Solution: The second sentence is the simple sentence. It is a single independent clause.
 The barber and his brother opened their shop in Harlem more than thirty years ago.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "923"	"Question: Which continent is highlighted?
  Task: closed choice
  Choices: ['South America', 'Australia', 'Africa', 'North America']
@@ -13597,7 +13597,7 @@ I can't believe you'd hire Jake Perry to watch your dog! Did you know that his f
  Hint:  
 Solution: The text argues that Jake must be an irresponsible dog owner, because his friend was an irresponsible dog owner. However, even though Jake's friend was irresponsible, that doesn't necessarily mean that Jake is also irresponsible. This illustrates a type of logical fallacy known as guilt by association.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "948"	"Question: Is the following statement about our solar system true or false?
 The volume of Uranus is less than ten times the volume of Neptune.
  Task: true-or false
@@ -17098,7 +17098,7 @@ Solution: The source of the allusion We're not in Kansas anymore is a movie.
 In the 1939 film The Wizard of Oz, Dorothy, a young farm girl from Kansas, finds herself in Oz, an unusual place that looks nothing like her home. She says to her dog, ""Toto, I've a feeling we're not in Kansas anymore.""
 The allusion We're not in Kansas anymore means we're in an unfamiliar place.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "1201"	"Question: Which correctly shows the title of a play?
  Task: closed choice
  Choices: ['My Fair Lady', 'My fair Lady']
@@ -18603,7 +18603,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
  Hint:  
 Solution: When four men's clothing stores closed on Main Street, the number of suppliers went down. There were fewer stores selling men's shirts. So, the supply of men's shirts probably went down.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"social science"
+Please output the answer in JSON style with an answer and a solution field"	""	"social science"
 "1314"	"Question: Complete the sentence so that it uses personification.
 ""You might think you'll always be young,"" Mrs. Osborne counseled, ""but time ()"".
  Task: closed choice
@@ -21476,7 +21476,7 @@ Elena is a competitive horseback rider, and she will be competing in the next Wo
 Solution: The sentence is compound-complex. It is made up of two independent clauses and a dependent clause. The dependent clause begins with the relative pronoun which.
 Elena is a competitive horseback rider, and she will be competing in the next World Equestrian Games, which are held every four years.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "1527"	"Question: Which animal is also adapted for flight?
  Task: closed choice
  Choices: ['Cape vulture', 'gaur']
@@ -22776,7 +22776,7 @@ Jayla went down the slide face-first, like a penguin.
 Solution: Jayla went down the slide face-first, like a penguin.
 The words Jayla and penguin are compared using the word like. So, the sentence uses a simile.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "1618"	"Question: What do these two changes have in common?
 bending a paper clip
 breaking a rock in half
@@ -24544,7 +24544,7 @@ Please output the answer in JSON style with an answer and a solution field"	"{""
 Solution: The text uses verbal irony, which involves saying one thing but implying something very different.
 Fits you well ironically suggests that the cap was too big. The cap was falling over Debbie's eyes, so it didn't fit her well at all.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "1751"	"Question: Select the vertebrate.
  Task: closed choice
  Choices: ['domestic dog', 'grasshopper', 'bumble bee', 'orb weaver']
@@ -24885,7 +24885,7 @@ Solution: Read the text carefully.
 Nick put on an extra pair of socks this morning because it was so cold.
 This passage tells you about the temperature this morning where Nick lives. It describes the atmosphere at a certain place and time. So, this passage describes the weather.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "1777"	"Question: Which of the following contains a vague pronoun reference?
  Task: closed choice
  Choices: ['After scouring the classified ads for days, Dave finally found a used car that fit his budget. The sedan needed to be fixed, but it had Bluetooth.', 'After scouring the classified ads for days, Dave finally found a used car that fit his budget. The sedan had Bluetooth, but it needed to be fixed.']
@@ -26064,7 +26064,7 @@ When Molly ran into Maria at the post office, she smiled and said hello.
 The second answer choice shows a possible correction for the vague pronoun reference. The text has been rewritten so that the meaning is clear.
 Molly smiled and said hello when she ran into Maria at the post office.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "1863"	"Question: Based on this information, what is Splash's genotype for the iridescent scales gene?
  Task: closed choice
  Choices: ['ii', 'mostly plain scales']
@@ -26479,7 +26479,7 @@ In a group of rats, some individuals have albinism and others do not. In this gr
 Faye, a rat from this group, does not have albinism. Faye has one allele for not having albinism and one allele for having albinism. 
 Solution: An organism's genotype for a gene is its combination of alleles for that gene. Faye has one allele for not having albinism (A) and one allele for having albinism (a). So, Faye's genotype for the albinism gene is Aa.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "1894"	"Question: Compare the average kinetic energies of the particles in each sample. Which sample has the higher temperature?
  Task: closed choice
  Choices: ['sample B', 'sample A', 'neither; the samples have the same temperature']
@@ -28718,7 +28718,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
 Solution: This result is a cost. It involves giving up or spending something that Billy wants or needs:
 Billy will give up the chance to look at the fir tree. He thinks it would have looked more beautiful than the gardenias.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"social science"
+Please output the answer in JSON style with an answer and a solution field"	""	"social science"
 "2054"	"Question: Which is a simple sentence?
  Task: closed choice
  Choices: ['Bears eat honeybees, and some birds eat them, too.', 'The mayor left a message for the president.']
@@ -29442,7 +29442,7 @@ The second text uses ironic in its nontraditional sense: marked by coincidence. 
 Last winter, Zane took a vacation to Florida to escape Boston's cold, snowy weather. In an ironic twist, he just missed a few of his college friends, who had been in Florida the previous week.
 Most style guides recommend to avoid using the nontraditional sense of the word ironic because it is generally considered incorrect.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2103"	"Question: Based on the continuum scale, which of the following blood types is more common that B+?
  Task: closed choice
  Choices: ['B-', 'A+']
@@ -29658,7 +29658,7 @@ A crab is a living thing.
 Crabs grow and respond to their environment. They need food and water. Crabs are made up of many cells.
 Crabs are animals. Some crabs live in oceans. Other crabs live in freshwater or on land.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2117"	"Question: Which is a complex sentence?
  Task: closed choice
  Choices: ['My fleece hat keeps my head and ears warm on even the coldest winter days.', 'Although she left her house early, Lola barely made it to the train station in time.']
@@ -31087,7 +31087,7 @@ Mr. Hoffman argues that we need to do more to prevent workplace injuries and fat
  Hint:  
 Solution: The text argues that being socially awkward determines knowledge of workplace safety. This is a personal attack that isn't relevant to Mr. Hoffman's desire to prevent workplace injuries. This illustrates a type of logical fallacy known as ad hominem.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2223"	"Question: Which specific humidity level was measured within the outlined area shown?
  Task: closed choice
  Choices: ['10 grams of water vapor per kilogram of air', '1 grams of water vapor per kilogram of air', '12 grams of water vapor per kilogram of air']
@@ -31217,7 +31217,7 @@ Solution: The source of the allusion draconian is Greek history.
 Draco, a government official in seventh-century Athens, Greece, wrote a code of laws that called for severe punishments for even minor offenses.
 The allusion draconian means harsh.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2233"	"Question: Select the amphibian below.
  Task: closed choice
  Choices: ['flamingo', 'European green toad']
@@ -33461,7 +33461,7 @@ Located just south of Seaside, Gabriel's Restaurant offers an eclectic menu in a
 Solution: This is not a run-on sentence. It is not formed from two sentences that have been run together without appropriate punctuation.
 Located just south of Seaside, Gabriel's Restaurant offers an eclectic menu in a scenic country setting.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2399"	"Question: Does this passage describe the weather or the climate?
  Task: closed choice
  Choices: ['weather', 'climate']
@@ -35100,7 +35100,7 @@ Barry has a scar on his left ankle.
  Hint: Hint: Most scars are caused by accidents during a person's life. 
 Solution: Children do not inherit their parent's scars. Instead, scars are caused by the environment. People can get scars after they get hurt. So, having a scar is an acquired trait.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2519"	"Question: Complete the text to describe the diagram.
 Solute particles moved in both directions across the permeable membrane. But more solute particles moved across the membrane (). When there was an equal concentration on both sides, the particles reached equilibrium.
  Task: closed choice
@@ -36298,7 +36298,7 @@ Please output the answer in JSON style with an answer and a solution field"	"```
  Hint: The objects are made of the same type of matter. 
 Solution: The two bowling balls have the same temperature and are made of the same type of matter. So, the bowling ball with less mass has less thermal energy.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2579"	"Question: Is the following trait inherited or acquired?
 Marco has five fingers on each hand.
  Task: closed choice
@@ -37392,7 +37392,7 @@ It's an open secret that Rodrigo is writing a book based on his experiences livi
 Solution: The text uses an oxymoron, a joining of two seemingly contradictory terms.
 Open secret is a contradiction, because open describes something that is freely or publicly known, and a secret is hidden.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2657"	"Question: Which would stretch the most?
  Task: closed choice
  Choices: ['bone', 'gold bracelet', 'rubber gloves']
@@ -37637,7 +37637,7 @@ Butter melting on a hot day is caused by heating. But cracking open a peanut is 
 Both are caused by cooling.
 Neither change is caused by cooling.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2675"	"Question: Which word would you find on a dictionary page with the following guide words?
 separate - snow
  Task: closed choice
@@ -37787,7 +37787,7 @@ Solution: Read the text carefully.
 The wind usually blows from the west or northwest in San Diego, California.
 This passage tells you about the usual wind pattern in San Diego. It does not describe what the weather is like on a particular day. So, this passage describes the climate.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2687"	"Question: Which figure of speech is used in this text?
 ""This mattress is as soft as concrete,"" Barry complained as he tested the bed in his hotel room.
  Task: closed choice
@@ -39789,7 +39789,7 @@ Solution: The writer could best improve his or her organization by removing text
 For example, the writer could remove the underlined sentence, which isn't clearly related to the main idea—the benefits of year-round school.
 Many students, parents, and teachers cringe at the idea of sending kids to school year-round, but it would improve academic performance. Lengthy summer vacations were not established to accommodate farming schedules, as most people assume; they were started so that wealthy families could leave the city in the hot summer months and vacation in the country. Studies have shown that as a result of ""summer slide,"" many students returning to school in the fall have forgotten what they learned the previous year. Year-round school would provide consistency and help students learn more.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2828"	"Question: Which object has the most thermal energy?
  Task: closed choice
  Choices: ['a cookie at a temperature of 12°C', 'a cookie at a temperature of 10°C', 'a cookie at a temperature of 13°C']
@@ -39917,7 +39917,7 @@ Please output the answer in JSON style with an answer and a solution field"	"""
 Solution: The best estimate for the volume of a kitchen sink is 12 gallons.
 12 fluid ounces and 12 cups are both too little.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"natural science"
+Please output the answer in JSON style with an answer and a solution field"	""	"natural science"
 "2839"	"Question: Compare the average kinetic energies of the particles in each sample. Which sample has the higher temperature?
  Task: closed choice
  Choices: ['neither; the samples have the same temperature', 'sample A', 'sample B']
@@ -40250,7 +40250,7 @@ Hunter is big-boned, so despite being in middle school, he often shops in the me
 Solution: The text uses a euphemism, a polite or indirect expression that is used to de-emphasize an unpleasant topic.
 The euphemism big-boned suggests that Hunter is overweight.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2865"	"Question: What is the volume of a watering can?
  Task: closed choice
  Choices: ['20 fluid ounces', '20 gallons', '20 cups']
@@ -41468,7 +41468,7 @@ The second text uses factoid in its nontraditional sense: a trivial but true fac
 A reporter for the Rockport Daily Mail dug up an amusing factoid about Rockport's founder while researching for an article about the town's early years.
 Most style guides recommend to use the traditional sense of the word factoid because it is considered more standard.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2953"	"Question: Based on this information, what is Pebbles's phenotype for the tail spots trait?
  Task: closed choice
  Choices: ['a spotted tail', 'an unspotted tail']
@@ -41702,7 +41702,7 @@ After he finished the marathon, Lester collapsed into a chair and declared that 
 Solution: The text uses hyperbole, an obvious exaggeration that is not meant to be taken literally.
 The hyperbole could no longer move a single muscle suggests that Lester was very tired and sore. His muscles were not literally incapable of moving.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "2970"	"Question: During this time, thermal energy was transferred from () to ().
  Task: closed choice
  Choices: ['each vial . . . the surroundings', 'the surroundings . . . each vial']
@@ -43654,7 +43654,7 @@ Before the town of Kennecott, Alaska, was deserted in the 1930s, it was home to 
 Solution: This is not a sentence fragment. It is a complete sentence because it expresses a complete thought.
 Before the town of Kennecott, Alaska, was deserted in the 1930 s, it was home to a thriving copper mine and mill, a hospital, a school, and a skating rink.
  Instruction: 
-Please output the answer in JSON style with an answer and a solution field"	"NA"	"language science"
+Please output the answer in JSON style with an answer and a solution field"	""	"language science"
 "3103"	"Question: Which of the following organisms is the primary consumer in this food web?
  Task: closed choice
  Choices: ['water flea', 'black crappie', 'water mold']
