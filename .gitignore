@@ -1,5 +1,7 @@
+*.synctex(busy)
 *.synctex.gz
 *.aux
 *.log
 *.out
 *.DS_Store
+*.ipynb_checkpoints
