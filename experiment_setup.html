@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Add Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* Table styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-family: 'Playfair Display', serif;
+            font-size: 1em;
+            font-weight: bold;
+            color: #555;
+        }
+
+        td {
+            font-size: .9em;
+        }
+
+        /* Border styles */
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        /* Zebra stripe rows */
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Row hover effect */
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Color classes */
+        .green {
+            color: #008000;
+            font-weight: bold;
+        }
+
+        .orange {
+            color: #ff4d00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Experiment Setup Table</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Experiment</th>
+            <th>Dataset Inputs</th>
+            <th>Teacher Outputs as Inputs</th>
+            <th>Expected</th>
+            <th>Done</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>baseline</td>
+            <td><span class="green">(answer, solution)</span> from <code>train</code></td>
+            <td>None</td>
+            <td>moderate performance</td>
+            <td><input type="checkbox" ></td>
+        </tr>
+        <tr>
+            <td>KD-v0 (raw outputs)</td>
+            <td>None</td>
+            <td><span class="orange">(answer, solution)</span> from <span>Big LLM*</span></td>
+            <td>worse than baseline</td>
+            <td><input type="checkbox" ></td>
+        </tr>
+        <tr>
+            <td>KD-v1 (joint inputs)</td>
+            <td><span class="green">(answer, solution)</span> from <code>train</code></td>
+            <td>
+                <b>expert_opinion:</b><br>
+                <span class="orange">answer</span> from <span>Teacher</span><br>
+                <span class="orange">solution</span> from <span>Teacher</span>
+            </td>
+            <td>maybe worse because of conflicts, but may also be better with the right prompt (~learn from mistakes)</td>
+            <td><input type="checkbox" ></td>
+        </tr>
+        <tr>
+            <td>KD-v2 (joint inputs + simulated RAG)</td>
+            <td><span class="green">(answer, solution)</span> from <code>train</code></td>
+            <td>
+                <b>expert_opinion:</b><br>
+                <span class="orange">answer</span> from <span>Teacher</span><br>
+                <span class="orange">solution</span> from <span>Teacher</span><br>
+                <span class="green">lecture</span> "retrieved"** by <span>Teacher</span>
+            </td>
+            <td>better than baseline, maybe better than skyline0 (domain specific model zero shot)</td>
+            <td><input type="checkbox" ></td>
+        </tr>
+        <tr>
+            <td>KD-v3 (sim. RAG)</td>
+            <td>None**</td>
+            <td>
+                <b>expert_opinion:</b><br>
+                <span class="orange">answer</span> from <span>Teacher</span><br>
+                <span class="orange">solution</span> from <span>Teacher</span><br>
+                <span class="green">lecture</span> "retrieved" by <span>Teacher</span>
+            </td>
+            <td>better than baseline, less inference and training costs than skyline1 (leaderboard)</td>
+            <td><input type="checkbox" ></td>
+        </tr>
+    </tbody>
+</table>
+
+<p><b>Notes:</b></p>
+<ul>
+    <li><b>Student:</b> <i>SLM: small Gen.LM with good reasoning capabilities but less science domain knowledge + LoRA / soft prompt (we learn this since our dataset is very small, even for 2B-3B models)</i></li>
+    <li><b>Teacher:</b> <i>big LLM: champion of cloud models (Gemini)</i>. Room for more experiments: different prompts to Teacher resulting in more interesting reasoning trajectories (CoT, self-ask...)</li>
+    <li><b>**:</b> <i>We are not doing actual retrieval with IR techniques; we simulate the RAG scenario with humanly retrieved lectures</i></li>
+</ul>
+
+</body>
+</html>
