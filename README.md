@@ -16,9 +16,9 @@ This repo is a course project in Foundation Models. Our domain is scientific que
   * 3.6. fine-tuning on reasoning paths of domain task (with or without "retrieved" context (=lecture) may be more efficient than fine-tuning on whole domain texts (compare performance of our best method to zero-shot inference of science model NOT tuned on this dataset, also compare with leaderboard. Also report differences in training and inference costs).
 
 
-
 ### 👣 Steps 👣
 1. Benchmarking existing good multimodal models (and small text-only models as weak baseline) - done.
 We have a champion: Gemini is the best for the role of big teacher LLM. Its outputs will be used as training CoT reasoning paths.
 2. Define the student model!
-3. How are we going to train the student? Write script for LoRA/soft prompting. 
+3. How are we going to train the student? Write script for LoRA/soft prompting.
+4. Experiment with small LLM + agent
