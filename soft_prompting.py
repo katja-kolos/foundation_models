@@ -17,7 +17,7 @@ class SoftPrompting:
             random_range: float = 0.5,
             **kwargs,
     ):
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model.to(device)
         for param in model.parameters():
             param.requires_grad = False
