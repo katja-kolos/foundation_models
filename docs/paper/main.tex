@@ -203,14 +203,52 @@ For now, we will only work with datapoints with non-empty solution AND with non-
 %\end{verbatim}
 which results in \textbf{3216} datapoints kept in validation data.  
 
-%\paragraph{Metrics}
-%We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
-%\subsection{Multiple choice Evaluation}
-%Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. This metric is considered of the highest importantce 
-%\subsection{Answer Reasoning Evaluation}
-%Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
-%, but the main metric we'll rely on is accuracy for question answering.
-%removing this as it will be replaced by better text from Dasha
+
+\paragraph{Metrics}
+We evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, and cosine similarity and more.
+\subsection{Multiple choice Evaluation}
+Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. It was determined that the computation of the overall score should assign the highest weight (\textbf{50\%}) to the ability to provide correct answers (accuracy score), as this represents the most critical aspect of performance evaluation.
+\subsection{Answer Reasoning Evaluation}
+Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
+
+\subsubsection{BLEU}
+BLEU-score (\cite{papineni2002bleu}) can measure how closely the model's generated explanation aligns with the human-authored explanation. BLEU-1 measures if the model uses the right scientific terms or key words (e.g., "photosynthesis," "temperature"). However, it ignores word order and logical progression, so it can’t evaluate reasoning or explanation quality. That is why BLEU-4 score is also computed in order to capture both vocabulary and the arrangement of words into meaningful phrases, evaluating fluency and coherence.
+Scientific explanations can often convey the same idea with different wording, making semantic similarity hard to capture.
+BLEU might penalize valid but rephrased or concise answers and it does not account for deeper meaning or logical correctness, which are crucial in reasoning tasks. Since this metric can give valuable insights on the generated outputs, we do not consider these scores as the most important and both BLEU-1 and BLEU-4 scores have \textbf{5\%} impact.
+
+\subsubsection{ROUGE}
+ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}, \ref{example:2}). It lead to the conclusion that this metric would not drastically affect the overall score and contribute (\textbf{5\%}).
+\begin{example}
+\label{example:1} 
+\begin{itemize}
+    \item \textbf{Reference:} Water evaporates, cools, and condenses to form clouds.
+    \item \textbf{Candidate:} Water cools, evaporates, and forms clouds.
+\end{itemize}
+\end{example}
+\begin{example}
+\label{example:2}
+\begin{itemize}
+    \item \textbf{Reference:} Plants absorb sunlight to produce energy.
+    \item \textbf{Candidate:} Sunlight is absorbed by plants to create energy.
+\end{itemize}
+\end{example}
+\subsubsubsection{Cosine similarity with Sentence Transformers}
+Cosine similarity using SentenceTransformer embeddings provides a robust method for evaluating model outputs in the ScienceQA dataset, focusing on the semantic alignment of generated explanations with references. It captures nuanced relationships and conceptual understanding, which gives more understanding of the generated outputs in comparison to ROUGE and BLEU scores and that is why it has more importance in final score computation. However, due to domain specificity it can miss some intricate cases like still considering high similarity of two sentences, even though it the reference can contain crucial information about carbon dioxide, while in the candidate sentence the answer was given in relation to oxygen reproduction.
+\subsubsection{METEOR}
+METEOR (\cite{banerjee2005meteor}) evaluates text similarity based on precision, recall, and alignment of semantically meaningful components like synonyms and stems, making it well-suited for capturing the nuanced language used in scientific reasoning.
+By incorporating a weighted F-score and penalties for excessive mismatches, METEOR provides a balanced evaluation of fluency and accuracy, crucial for assessing LLM-generated answers on the Science QA Dataset. Due to these balanced text evaluation, this metric has \textbf{10\%} impact on the overall score.
+% \subsubsection{Cosine similarity with SciBERT}
+% We extended the evaluation of cosine similarity using SciBERT (\cite{beltagy2019scibert}) embeddings. These vectors are more consistent with the domain-specific terminology and reasoning patterns present in the Science QA Dataset because it has been properly pre-trained on scientific literature.
+% SciBERT generates more accurate similarity embeddings because it better reflects the complex relationships between scientific concepts than general-purpose models like those in Sentence Transformers.
+% When assessing the logical and factual coherence of scientific reasoning, the structural and contextual semantics specific to scientific texts are reflected in the embeddings produced by SciBERT.
+% Assessments for jobs requiring sophisticated scientific understanding are more reliable when SciBERT is used for cosine similarity since it guarantees that the evaluation metric is domain-specific.
+
+\subsubsection{Cosine similarity with Sentence Transformers}
+Sentence Transformer models are optimized for sentence-level embeddings, which capture the overall contextual similarity of answers more effectively, making them suitable for general-purpose evaluation tasks like scientific reasoning.
+Unlike SciBERT, which is tailored to scientific text and could have been used as sentence embedder, Sentence Transformers are pre-trained on diverse datasets, enabling them to generalize better to variations in phrasing and style present in the Science QA Dataset.
+Their ability to handle broader linguistic nuances ensures that the evaluation accounts for both semantic correctness and the logical flow of responses, which is essential when assessing reasoning across a wide range of scientific topics. That is the reason for using Sentence Transformer model for measurements of cosine similarity between the lecture material and annotated explanations and models' outputs with impact weight of \textbf{15\%}.
+
+
 
 \section{Experiments}
 \label{experiments}
