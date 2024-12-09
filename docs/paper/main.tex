@@ -1,47 +1,102 @@
-%%%%%%%%%
-% Generic article template using additional packages for table formatting
-% New commands are defined for project participants: \katja, \flo, \dasha - 
-% to draw attention to important remarks directly in the text
-%%%%%%%%%
+%%%%%%%% ICML 2021 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
 
-\documentclass[10pt]{article}
-\usepackage[a4paper, margin=.90in]{geometry}
+\documentclass{article}
 
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
 \usepackage{graphicx}
-\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2021} with \usepackage[nohyperref]{icml2021} above.
 \usepackage{hyperref}
-\usepackage{xcolor}
-\usepackage{booktabs}
-\usepackage{adjustbox}
 
-\usepackage{titlesec}
-\titlespacing*{\section}{0pt}{*0.8}{*0.8}
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
 
-\newcommand{\katja}[1]{\textbf{\textcolor{teal}{(Katja) #1}}}
-\newcommand{\dasha}[1]{\textbf{\textcolor{brown}{(Dasha) #1}}}
-\newcommand{\flo}[1]{\textbf{\textcolor{red}{(Flo) #1}}}
+% Use the following line for the initial blind version submitted for review:
+%\usepackage{icml2021}
 
-\bibliography{main}
-\usepackage[style=numeric, backend=biber]{biblatex}
+% If accepted, instead use the following line for the camera-ready submission:
+\usepackage[accepted]{icml2021}
 
-
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Submission and Formatting Instructions for ICML 2021}
 \begin{document}
 
-\title{Scientific Reasoning with LLMs}
+\twocolumn[
+\icmltitle{Scientific Reasoning: \\
+           Assessment of Multimodal Generative LLMs}
 
-%we'll probably have a group number later
-%names are given in alphabetical order
-\author{Stuttgart Team: Florian Dreyer (3667877) \and Ekaterina Kolos (3688474) \and Daria Matiash (3668740)}
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2021
+% package.
 
-\maketitle             
+% List of affiliations: The first argument should be a (short)
+% identifier you will use later to specify author affiliations
+% Academic affiliations should list Department, University, City, Region, Country
+% Industry affiliations should list Company, City, Region, Country
+
+% You can specify symbols, otherwise they are numbered in order.
+% Ideally, you should not use this facility. Affiliations will be numbered
+% in order of appearance and this is the preferred way.
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Florian Dreyer (3667877)}{equal,cs}
+\icmlauthor{Ekaterina Kolos (3688474)}{equal,ims}
+\icmlauthor{Daria Matiash (3668740)}{equal,ims}
+\end{icmlauthorlist}
+
+\icmlaffiliation{cs}{Institut fuer KI}
+\icmlaffiliation{ims}{Institut fuer Maschinelle Sprachverarbeitung}
+
+\icmlcorrespondingauthor{Florian Dreyer}{c.vvvvv@googol.com}
+%\icmlcorrespondingauthor{Eee Pppp}{ep@eden.co.uk}
+
+% You may provide any keywords that you
+% find helpful for describing your paper; these are used to populate
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{Scientific Reasoning, VQA}
+
+\vskip 0.3in
+]
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column
+% listing the affiliations and the copyright notice.
+% The command takes one argument, which is text to display at the start of the footnote.
+% The \icmlEqualContribution command is standard text for equal contribution.
+% Remove it (just {}) if you do not need this facility.
+
+%\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
+\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
+
+\begin{abstract}
+This project assesses the capabilities of pre-trained multimodal LLMs to perform scientific reasoning tasks on multimodal data. We further explore how prompt tuning (soft prompting) and prompt engineering techniques can improve performance. We then attempt to distill knowledge to a small LLM.
+\end{abstract}
+           
 
 
 \section{Introduction}
+\label{introduction}
 
+\textbf{SECTION NEEDS UPDATE}
 Scientific machine reasoning is the application of AI techniques to simulate scientific reasoning processes, such as  data interpretation, hypothesis generation, and causal inference. It facilitates scientific inquiry and discovery by enabling machines to independently analyze scientific data, generate hypotheses, and make predictions.
 For our project, we intend to compare different approaches around generative large language models to generate solutions for school science problems. On an existing benchmark with human solutions, we are planning to compare: a pure LLM with zero-shot and few-shot prompting (and possibly some more fine-grained prompting techniques), an agentic approach with ability to query external resources like textbooks in physics, maths etc, and soft-prompting techniques. We then plan to attempt knowledge distillation to a smaller LLM. 
 
+\section{Motivation}
+\label{motivation}
+\textbf{TODO}
+
 \section{Background and Related Work}
+\label{related-work}
+
 % Large Language Models
 
 \paragraph{Prompting techniques} A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Of particular interest are small requirements on the reasoning process that can significantly improve performance when added to the prompt, such as 
@@ -62,61 +117,67 @@ In our project, we plan to develop an extended version of CoT knowledge distilla
 
 \section{Methodology}
 We postulate the following research questions: 
-RQ1: Can we build a LLM agent to improve the LLMs performance on science problems?
-RQ2: Does Soft Prompting improve the performance of the LLM (agent)?
-RQ3: Can an LLM agent's behavior be distilled into a single model?
+%RQ1: Can we build a LLM agent to improve the LLMs performance on science problems?
+%RQ2: Does Soft Prompting improve the performance of the LLM (agent)?
+%RQ3: Can an LLM agent's behavior be distilled into a single model?
+RQ1: Does Soft Prompting improve the performance of the LLM for scientific reasoning?
+RQ2: Can a teacher model's knowledge be distilled into a student model's soft prompt?
 
-\paragraph{RQ1} 
-We plan to start by prompting a multimodal model with reasoning capabilities with a zero-shot and few-shot prompting settings. Preliminary list of foundation models to be compared as baselines is: CLIP, GPT4o (GPT4-V), T5, BigGAN, Gemini; small models: TinyCLIP, T5-Small; Llama models. This simple generation will be compared with an agent-based approach using the same models, which will now include augmented retrieval of information on the scientific task from domain-specific texts. 
+%\paragraph{RQ1} 
+%We plan to start by prompting a multimodal model with reasoning capabilities with a zero-shot and few-shot prompting settings. Preliminary list of foundation models to be compared as baselines is: CLIP, GPT4o (GPT4-V), T5, BigGAN, Gemini; small models: TinyCLIP, T5-Small; Llama models. This simple generation will be compared with an agent-based approach using the same models, which will now include augmented retrieval of information on the scientific task from domain-specific texts. 
 
-\paragraph{RQ2}
-We plan to use Soft Prompting as one of the parameter-efficient fine-tuning techniques on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
+%\paragraph{RQ2}
+%We plan to use Soft Prompting as one of the parameter-efficient fine-tuning techniques on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
+\paragraph{RQ1}
+Our soft prompting approach relies on prefix soft prompts as introduced in [TODO: cite Li 2021], that can be used both for encoder-decoder and for autoregressive architectures. The models we test here are autoregressive.
 
-\paragraph{RQ3}
-In order to distill the knowledge from the system obtained at previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses together with any additional information the agent has retrieved from external sources to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. 
-The foundation model to serve as student LLM should be small, multimodal, capable of reasoning and capable of acquiring new distilled knowledge. A preliminary list of candidate models: small Llama and LLaVA models, MiniGPT-4, small FLAVA models, distilUNITER, lxmert, distilled ViLT.
+%\paragraph{RQ3}
+%In order to distill the knowledge from the system obtained at previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses together with any additional information the agent has retrieved from external sources to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. 
+%The foundation model to serve as student LLM should be small, multimodal, capable of reasoning and capable of acquiring new distilled knowledge. A preliminary list of candidate models: small Llama and LLaVA models, MiniGPT-4, small FLAVA models, distilUNITER, lxmert, distilled ViLT.
 %The described approach can help the student model avoid common mistakes and output more consistent answers.
 
 \section{Dataset}
+\label{dataset}
 This study is based on the ScienceQA dataset \cite{lu2022learn}. The dataset includes a variety of science-related multimodal multiple-choice questions together with annotations of the answers that provide relevant lectures and explanations in Nature Science, Language Science and Social Science.
 
-Data points are structured as follows:
-\begin{verbatim}
-{'image': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=200x202>,
- 'question': 'Is diorite a mineral or a rock?',
- 'choices': ['rock', 'mineral'],
- 'answer': 0,
- 'hint': 'Diorite has the following properties:\nno fixed crystal structure\nnaturally occurring\nnot a pure substance\ncoarse-grained texture\nsolid\nnot made by organisms',
- 'task': 'closed choice',
- 'grade': 'grade8',
- 'subject': 'natural science',
- 'topic': 'earth-science',
- 'category': 'Rocks and minerals',
- 'skill': 'Identify rocks and minerals',
- 'lecture': 'Minerals are the building blocks of rocks. A rock can be made of one or more minerals.\nMinerals and rocks have the following properties:\nProperty | Mineral | Rock\nIt is a solid. | Yes | Yes\nIt is formed in nature. | Yes | Yes\nIt is not made by organisms. | Yes | Yes\nIt is a pure substance. | Yes | No\nIt has a fixed crystal structure. | Yes | No\nYou can use these properties to tell whether a substance is a mineral, a rock, or neither.\nLook closely at the last three properties:\nMinerals and rocks are not made by organisms.\nOrganisms make their own body parts. For example, snails and clams make their shells. Because they are made by organisms, body parts cannot be  minerals or rocks.\nHumans are organisms too. So, substances that humans make by hand or in factories are not minerals or rocks.\nA mineral is a pure substance, but a rock is not.\nA pure substance is made of only one type of matter.  Minerals are pure substances, but rocks are not. Instead, all rocks are mixtures.\nA mineral has a fixed crystal structure, but a rock does not.\nThe crystal structure of a substance tells you how the atoms or molecules in the substance are arranged. Different types of minerals have different crystal structures, but all minerals have a fixed crystal structure. This means that the atoms and molecules in different pieces of the same type of mineral are always arranged the same way.\nHowever, rocks do not have a fixed crystal structure. So, the arrangement of atoms or molecules in different pieces of the same type of rock may be different!',
- 'solution': 'The properties of diorite match the properties of a rock. So, diorite is a rock.'}
-\end{verbatim}
+%Data points are structured as follows:
+%\begin{verbatim}
+%{'image': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=200x202>,
+% 'question': 'Is diorite a mineral or a rock?',
+% 'choices': ['rock', 'mineral'],
+% 'answer': 0,
+% 'hint': 'Diorite has the following properties:\nno fixed crystal structure\nnaturally occurring\nnot a pure substance\ncoarse-grained texture\nsolid\nnot made by organisms',
+% 'task': 'closed choice',
+% 'grade': 'grade8',
+% 'subject': 'natural science',
+% 'topic': 'earth-science',
+% 'category': 'Rocks and minerals',
+% 'skill': 'Identify rocks and minerals',
+% 'lecture': 'Minerals are the building blocks of rocks. A rock can be made of one or more minerals.\nMinerals and rocks have the following properties:\nProperty | Mineral | Rock\nIt is a solid. | Yes | Yes\nIt is formed in nature. | Yes | Yes\nIt is not made by organisms. | Yes | Yes\nIt is a pure substance. | Yes | No\nIt has a fixed crystal structure. | Yes | No\nYou can use these properties to tell whether a substance is a mineral, a rock, or neither.\nLook closely at the last three properties:\nMinerals and rocks are not made by organisms.\nOrganisms make their own body parts. For example, snails and clams make their shells. Because they are made by organisms, body parts cannot be  minerals or rocks.\nHumans are organisms too. So, substances that humans make by hand or in factories are not minerals or rocks.\nA mineral is a pure substance, but a rock is not.\nA pure substance is made of only one type of matter.  Minerals are pure substances, but rocks are not. Instead, all rocks are mixtures.\nA mineral has a fixed crystal structure, but a rock does not.\nThe crystal structure of a substance tells you how the atoms or molecules in the substance are arranged. Different types of minerals have different crystal structures, but all minerals have a fixed crystal structure. This means that the atoms and molecules in different pieces of the same type of mineral are always arranged the same way.\nHowever, rocks do not have a fixed crystal structure. So, the arrangement of atoms or molecules in different pieces of the same type of rock may be different!',
+% 'solution': 'The properties of diorite match the properties of a rock. So, diorite is a rock.'}
+%\end{verbatim}
 
 For some datapoints, the image data is missing, while the answer can be deduced from text alone (e.g. questions on 'subject': 'language science', 'topic': 'figurative-language', 'skill': 'Interpret figures of speech' (e.g. irony recognition). 
 
-For other datapoints, however, the image data can be missing, although required to make an answer, e.g.
-\begin{verbatim}
-{'image': None,
- 'question': 'What information supports the conclusion that Rick inherited this trait?',
- 'choices': ["Rick's coworker also has curly hair.",
-  "Rick's biological father has curly hair.",
-  'Rick and his biological parents have brown hair.'],
- 'answer': 1,
- 'hint': 'Read the description of a trait.\nRick has curly hair.',
- 'task': 'closed choice',
- 'grade': 'grade7',
- 'subject': 'natural science',
- 'topic': 'biology',
- 'category': 'Genes to traits',
- 'skill': 'Inherited and acquired traits: use evidence to support a statement',
- 'lecture': "Organisms, including people, have both inherited and acquired traits. Inherited and acquired traits are gained in different ways.\nInherited traits are passed down from biological parents to their offspring through genes. Genes are pieces of hereditary material that contain the instructions that affect inherited traits. Offspring receive their genes, and therefore gain their inherited traits, from their biological parents. Inherited traits do not need to be learned.\nAcquired traits are gained during a person's life. Some acquired traits, such as riding a bicycle, are gained by learning. Other acquired traits, such as scars, are caused by the environment. Parents do not pass acquired traits down to their offspring.",
- 'solution': ''}
-\end{verbatim}
+For other datapoints, however, the image data can be missing, although required to make an answer.
+%, e.g.
+%\begin{verbatim}
+%{'image': None,
+% 'question': 'What information supports the conclusion that Rick inherited this trait?',
+% 'choices': ["Rick's coworker also has curly hair.",
+%  "Rick's biological father has curly hair.",
+%  'Rick and his biological parents have brown hair.'],
+% 'answer': 1,
+% 'hint': 'Read the description of a trait.\nRick has curly hair.',
+% 'task': 'closed choice',
+% 'grade': 'grade7',
+% 'subject': 'natural science',
+% 'topic': 'biology',
+% 'category': 'Genes to traits',
+% 'skill': 'Inherited and acquired traits: use evidence to support a statement',
+% 'lecture': "Organisms, including people, have both inherited and acquired traits. Inherited and acquired traits are gained in different ways.\nInherited traits are passed down from biological parents to their offspring through genes. Genes are pieces of hereditary material that contain the instructions that affect inherited traits. Offspring receive their genes, and therefore gain their inherited traits, from their biological parents. Inherited traits do not need to be learned.\nAcquired traits are gained during a person's life. Some acquired traits, such as riding a bicycle, are gained by learning. Other acquired traits, such as scars, are caused by the environment. Parents do not pass acquired traits down to their offspring.",
+% 'solution': ''}
+%\end{verbatim}
 
 Apart from the image field, missing values can occur in lecture and solution fields. The statistics in table \ref{table:dataset-stats} give an overview on the amount of problematic datapoints. 
 
@@ -142,71 +203,68 @@ For now, we will only work with datapoints with non-empty solution AND with non-
 %\end{verbatim}
 which results in \textbf{3216} datapoints kept in validation data.  
 
-\paragraph{Metrics}
-We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
-\subsection{Multiple choice Evaluation}
-Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. This metric is considered of the highest importantce 
-\subsection{Answer Reasoning Evaluation}
-Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
-\subsubsubsection{BLEU}
-
-\subsubsubsection{ROUGE}
-\subsubsubsection{METEOR}
-
+%\paragraph{Metrics}
+%We'll evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, BLANC, and BERTScore and more.
+%\subsection{Multiple choice Evaluation}
+%Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. This metric is considered of the highest importantce 
+%\subsection{Answer Reasoning Evaluation}
+%Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
 %, but the main metric we'll rely on is accuracy for question answering.
+%removing this as it will be replaced by better text from Dasha
 
 \section{Experiments}
+\label{experiments}
 
-\subsection{Zero-shot and Few-shot Benchmarking}
-We start by zero-shot benchmarking existing multimodal models in three simple prompt settings, partly repeating with the official evaluation suite:
+\subsection{Setup}
+We start by zero-shot benchmarking existing multimodal models in four simple prompt settings, partly repeating with the official evaluation suite:
 \begin{enumerate}
-	\item \textbf{question - choices - hint - image - task}, with the following prompt:
-	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'}\end{verbatim}
-	\item \textbf{question - choices - hint - image - task + lecture}, with the following prompt:
-	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n 
-	Lecture: {lecture}'}\end{verbatim}
-	\item \textbf{question - choices - hint - image - task + lecture + solution}, with the following prompt:
-	\begin{verbatim}{f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}\n 
-	Lecture: {lecture}\n Solution: {solution}'}\end{verbatim}
+	\item \textbf{question - choices - hint - image - task}
+	\item \textbf{question - choices - hint - image - task + lecture}
+	\item \textbf{question - choices - hint - image - task + lecture + solution}
+	\item \textbf{question - choices - hint - image - task + solution}
 \end{enumerate}
 
 For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
 
 We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: list models. 
 
-\section{Benchmark}
+\subsection{Metrics}
 % description of metrics, why they were used + analytics of results
-\subsection{Accuracy}
+\subsubsection{Accuracy}
 The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. `GPT-4` consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The `LLaVAModel1.5-7b`, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
 
-\subsection{Cosine similarity}
-\subsection{BLEU-1}
+\subsubsection{Cosine similarity}
+\subsubsection{BLEU-1}
 Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `GPT-4o-mini` model demonstrated superior performance, surpassing `GPT-4`, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly `LLaVAModel1.5-7b`, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
 
-\subsection{BLEU-4}
+\subsubsection{BLEU-4}
 Scores were consistently higher in settings 3 and 4, particularly for  models, demonstrating their ability to produce more contextually precise outputs when both lecture and solution information were provided. Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. `LlaVAModel`, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
 
+\subsubsection{METEOR}
+TODO
 
-\subsection{ROUGE}
+\subsubsection{ROUGE}
 The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  `LlaVAModel` anf `GPT-4` had highest ROUGE-scores on settings without solutions. Outputs of `GPT-4` without knowledge of the correct answer had higher ROUGE score than `GPT-4o-mini` given solutions in the input.
 
 
-\subsection{Cosine similarity}
+\subsubsection{Cosine similarity}
 Semantic alignment with the reference is assessed by the similarity metric. Gemini and its variants outperformed other models, demonstrating their great capacity to capture the semantic structure of enriched input. Similarity scores were highest in settings 3 and 4. LLaVAModel1.5-7b, on the other hand, received the lowest score in setting 1, indicating that it mostly depends on lecture or solution data to generate outputs that are semantically accurate. This result emphasises how more data affects the resulting content's semantic integrity. `GPT-4o-mini` and `LLaVAModel` performed better than other models in environments lacking solution information, indicating that they can produce reliable results even with limited  contextual guidance.
 
-\subsection{Summary}
+\subsubsection{Summary}
 Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The GPT-4o-mini model outperformed GPT-4 in multiple instances, indicating the efficacy of smaller, more targeted designs, even if GPT-4 continuously received excellent accuracy and informativeness scores. While LLaVAModel1.5-7b failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
 Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers.
 
 
+\subsection{Zero-shot Benchmarking on Validation}
 \subsubsection{Local Models from HuggingFace}
 
 \paragraph{Pre-experiments} We were not successful with processing with small non-chat models. For the given text + image, the models would return short non-meaningful answers, like "Yes" to a "X or Y" question, or "no idea" to a completely defined task with all relevant context included. These were multimodal models below 1B on Huggingface, not tuned to be used in a chat scenario (and prepending a "You are a helpful assistant..." to the beginning of the prompt was not enough to fix this). 
 We are not sure how to use those models for our purposes as of now. 
 
-\paragraph{MiniGPT-4} This is a small multimodal model designed from ?? \cite{zhu2023minigpt}. It offers to build the model based on Llama or Vicuna. 
-\textbf{Unsuccessful experiment}: We tried to resort to an unofficial implementation: \texttt{wangrongsheng/MiniGPT-4-LLaMA-7B}. Loading the model was not successful (no preprocessor\_config.json). 
-Another issue: using BlipForConditionalGeneration and BlipProcessor: "You are using a model of type llama to instantiate a model of type blip. This is not supported for all configurations of models and can yield errors.". Model size: ~10GB. Processor: ~3.6GB. 
+%Unsuccessful attempts can be mentioned in appendix I guess
+%\paragraph{MiniGPT-4} This is a small multimodal model designed from ?? \cite{zhu2023minigpt}. It offers to build the model based on Llama or Vicuna. 
+%\textbf{Unsuccessful experiment}: We tried to resort to an unofficial implementation: \texttt{wangrongsheng/MiniGPT-4-LLaMA-7B}. Loading the model was not successful (no preprocessor\_config.json). 
+%Another issue: using BlipForConditionalGeneration and BlipProcessor: "You are using a model of type llama to instantiate a model of type blip. This is not supported for all configurations of models and can yield errors.". Model size: ~10GB. Processor: ~3.6GB. 
 
 \paragraph{LLaVa} The exact model used is: \texttt{llava-hf/llava-1.5-7b-hf} (and there is a larger sister 13b model). It is based on LLaMA and (?) Vicuna fine-tuned on GPT-generated multimodal instruction-following data.
 It expects inputs as conversation, allowing the preprocessor to convert textual input into format "USER: {request} ASSISTANT: " where the assistant has to fill in the rest. 
@@ -221,20 +279,21 @@ We encountered the following issues while applying this model version on Science
 There is another available model LLaVANext, which recently started to support batching, and should have better performance. 
 %Issues: https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf/discussions/34 
 
-
 Note: I later (after running the model) understood that the original model is this one: `liuhaotian/llava-v1.5-7b`. The results may thus be different from what would be expected from the model's paper. 
 
 
-\paragraph{BLIP-2}
+%\paragraph{BLIP-2}
 
-\paragraph{LLaMA models}
+%\paragraph{LLaMA models} -- forbidden in EU, ignore
  
-\paragraph{Gemma2}
+%\paragraph{Gemma2} -- Paligemma has seen ScienceQA
 
-\paragraph{Qwen models} e.g.  Qwen2.5-Coder
+\paragraph{Qwen models} 
+%e.g.  Qwen2.5-Coder
+Current experiment
 
-\paragraph{}
- 
+\paragraph{Pixtral}
+
 \begin{table}
 \centering
 \begin{tabular}{rcc}
@@ -251,26 +310,37 @@ Note: I later (after running the model) understood that the original model is th
 \caption{Model Comparison: Benchmarked Models}
 \end{table}
 
-The metrics used for evaluation at this point are: accuracy, \texttt{BLEU-1}, \texttt{BLEU-4}, \texttt{ROUGE}, similarity. 
+%The metrics used for evaluation at this point are: accuracy, \texttt{BLEU-1}, \texttt{BLEU-4}, \texttt{ROUGE}, similarity. 
 
-\section{Approximate Timeline}
-\begin{enumerate}
-	\item \textbf{Now - mid November}: 
-		\begin{itemize}
-  			\item Preliminary baseline tests: compare "pure LLM"s relying only on commonsense reasoning / only on pretraining (zero-shot, few-shot).
-			\item Stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask.
-		\end{itemize}
-	\item \textbf{mid November - mid December}:
-		\begin{itemize}
-  			\item Construct agentic / RAG pipeline with “big smart” model + additional resources.
-  			\item Optional: soft-prompting for better workflow to distill from.
-		\end{itemize}
-	\item \textbf{mid December - mid January}:
-  		\begin{itemize}
-			\item Knowledge distillation experiments.
-		\end{itemize}
-\end{enumerate}
+%\section{Approximate Timeline}
+%\begin{enumerate}
+%	\item \textbf{Now - mid November}: 
+%		\begin{itemize}
+%  			\item Preliminary baseline tests: compare "pure LLM"s relying only on commonsense reasoning / only on pretraining (zero-shot, few-shot).
+%			\item Stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask.
+%		\end{itemize}
+%	\item \textbf{mid November - mid December}:
+%		\begin{itemize}
+ % 			\item Construct agentic / RAG pipeline with “big smart” model + additional resources.
+%  			\item Optional: soft-prompting for better workflow to distill from.
+%		\end{itemize}
+%	\item \textbf{mid December - mid January}:
+%  		\begin{itemize}
+%			\item Knowledge distillation experiments.
+%		\end{itemize}
+%\end{enumerate}
 
-\printbibliography
+\section{Knowledge Distillation \& Soft Prompting}
+\label{knowledge-distillation}
+
+\section{Error Analysis}
+\label{error-analysis}
+
+\section{Conclusion}
+\label{Conclusion}
+
+%\printbibliography
+\bibliography{example_paper}
+\bibliographystyle{icml2021}
 
 \end{document}
