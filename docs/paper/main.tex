@@ -162,15 +162,15 @@ BLEU might penalize valid but rephrased or concise answers and it does not accou
 \paragraph{ROUGE}
 ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}). It lead to the conclusion that this metric would not drastically affect the overall score and contribute (\textbf{5\%}).
 
-\begin{example}
+%\begin{example}
 \label{example:1}
 \begin{itemize}
     \item \textbf{Reference:} Plants absorb sunlight to produce energy.
     \item \textbf{Candidate:} Sunlight is absorbed by plants to create energy.
 \end{itemize}
-\end{example}
+%\end{example}
 
-\subsubsubsection{Cosine similarity with Sentence Transformers}
+\paragraph{Cosine similarity with Sentence Transformers}
 Cosine similarity using SentenceTransformer embeddings provides a robust method for evaluating model outputs in the ScienceQA dataset, focusing on the semantic alignment of generated explanations with references. It captures nuanced relationships and conceptual understanding, which gives more understanding of the generated outputs in comparison to ROUGE and BLEU scores and that is why it has more importance in final score computation. However, due to domain specificity it can miss some intricate cases like still considering high similarity of two sentences, even though it the reference can contain crucial information about carbon dioxide, while in the candidate sentence the answer was given in relation to oxygen reproduction.
 \paragraph{METEOR}
 METEOR (\cite{banerjee2005meteor}) evaluates text similarity based on precision, recall, and alignment of semantically meaningful components like synonyms and stems, making it well-suited for capturing the nuanced language used in scientific reasoning.
@@ -255,29 +255,27 @@ Lecture information doesn’t really affect models’ performance, it can even d
 \subsection{Zero-shot Benchmarking on Validation}
 \subsubsection{Local Models from HuggingFace}
 
-\paragraph{Pre-experiments} We were not successful with processing with small non-chat models. For the given text + image, the models would return short non-meaningful answers, like "Yes" to a "X or Y" question, or "no idea" to a completely defined task with all relevant context included. These were multimodal models below 1B on Huggingface, not tuned to be used in a chat scenario (and prepending a "You are a helpful assistant..." to the beginning of the prompt was not enough to fix this). 
-We are not sure how to use those models for our purposes as of now. 
+\paragraph{Pre-experiments} We were not successful in processing the dataset with small non-chat models. Those  models would return short meaningless answers, like "Yes" to a "X or Y" question, or "no idea" to a completely defined task with all relevant context included. These were multimodal models below 1B on Huggingface, not tuned to be used in a chat scenario (and prepending a "You are a helpful assistant..." to the beginning of the prompt was not enough to fix this).  We are not sure how to use those models for our purposes as of now. 
 
 %Unsuccessful attempts can be mentioned in appendix I guess
 %\paragraph{MiniGPT-4} This is a small multimodal model designed from ?? \cite{zhu2023minigpt}. It offers to build the model based on Llama or Vicuna. 
 %\textbf{Unsuccessful experiment}: We tried to resort to an unofficial implementation: \texttt{wangrongsheng/MiniGPT-4-LLaMA-7B}. Loading the model was not successful (no preprocessor\_config.json). 
 %Another issue: using BlipForConditionalGeneration and BlipProcessor: "You are using a model of type llama to instantiate a model of type blip. This is not supported for all configurations of models and can yield errors.". Model size: ~10GB. Processor: ~3.6GB. 
 
-\paragraph{LLaVa} The exact model used is: \texttt{llava-hf/llava-1.5-7b-hf} (and there is a larger sister 13b model). It is based on LLaMA and (?) Vicuna fine-tuned on GPT-generated multimodal instruction-following data.
-It expects inputs as conversation, allowing the preprocessor to convert textual input into format "USER: {request} ASSISTANT: " where the assistant has to fill in the rest. 
-We encountered the following issues while applying this model version on ScienceQA data: 
+\paragraph{LLaVa 1.5 7B} The exact model used is: \texttt{llava-hf/llava-1.5-7b-hf} (and there is a larger sister 13b model). It is based on LLaMA and Vicuna, and is fine-tuned on GPT-generated multimodal instruction-following data. It expects inputs as conversation, allowing the preprocessor to convert textual input into format "USER: {request} ASSISTANT: " where the assistant has to fill in the rest. 
+
+We encountered the following issues while applying this model version on ScienceQA data (although, as we discovered later, the model had actually been trained on ScienceQA): 
 \begin{itemize}
 	\item although prompted like larger models, this model returned answer strings and not choice index; this may additionally raise an issue of the returned answer not being entirely part of the choice list;
 	\item although prompted to generate JSON, the model would sometimes generate a different string, e.g. simply repeating part of the task. Unexpected format happened in ?? \% of all answers. We disregarded these answers, considering them all wrong, which results in a bit more pessimistic estimation of the model's performance. The metrics on the correctly formatted answers alone are also given. 
-	\item the model currently does not accept inputs without an image (text-only); according to a huggingface discussion\footnote{https://huggingface.co/llava-hf/llava-1.5-7b-hf/discussions/38}, the authors claim to have accidentally removed this possibility in a recent update. We worked around this by producing placeholder empty 10x10 white images and passing them as part of the input when the image in the dataset was missing. We also appended the suffix "Ignore image" to the end of the prompt, because the model would otherwise try to hallucinate a relation between the text and the image (e.g. "Why is the sky blue" + placeholder image results in "The sky is blue on the picture because ...");
-	\item the model does not really seem to support batch processing; although officially the technical possibility exists, it has been reported online \footnote{https://huggingface.co/llava-hf/llava-1.5-13b-hf/discussions/10} that the model would only take into account the first image in the batch, which makes the processing useless. We did not risk to attempt the supported or custom batching and processed the filtered validation dataset 1 datapoint by 1, which took 10+ hours on GPU for inference. 
+	\item the model currently does not accept inputs without an image (text-only); according to a huggingface discussion\footnote{https://huggingface.co/llava-hf/llava-1.5-7b-hf/discussions/38}, the authors claim to have accidentally removed this possibility in a recent update. We worked around this by producing placeholder empty 10x10 white images and passing them as part of the input when the image in the dataset was missing. We also appended the suffix \textit{"Ignore image"} to the end of the prompt, because the model would otherwise try to hallucinate a relation between the text and the image (e.g. "Why is the sky blue" + placeholder image results in "The sky is blue on the picture because ...");
+	\item the model does not really seem to support batch processing; although officially the technical possibility exists, it has been reported online \footnote{https://huggingface.co/llava-hf/llava-1.5-13b-hf/discussions/10} that the model would only take into account the first image in the batch, which makes the processing useless. We did not risk to attempt the supported or custom batching and processed the filtered validation dataset 1 datapoint by 1. 
 \end{itemize}
 
 There is another available model LLaVANext, which recently started to support batching, and should have better performance. 
 %Issues: https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf/discussions/34 
 
-Note: I later (after running the model) understood that the original model is this one: `liuhaotian/llava-v1.5-7b`. The results may thus be different from what would be expected from the model's paper. 
-
+%Note: I later (after running the model) understood that the original model is this one: `liuhaotian/llava-v1.5-7b`. The results may thus be different from what would be expected from the model's paper. 
 
 %\paragraph{BLIP-2}
 
@@ -285,11 +283,19 @@ Note: I later (after running the model) understood that the original model is th
  
 %\paragraph{Gemma2} -- Paligemma has seen ScienceQA
 
-\paragraph{Qwen models} 
-%e.g. �Qwen2.5-Coder
-Current experiment
 
 \paragraph{Pixtral}
+
+We benchmarked \texttt{mistralai/Pixtral-12B-2409} on BWCluster using \texttt{vllm} and 4 GPUs. In this setup, the generations may continue beyond a stop token, degenerating into complete nonsense (code, crazy text, gibberish). A postprocessing script was used to cut answers of the model when the first stop signal occurs (closing <s> tag, or [STOP] etc).
+
+A bad degeneration case was when the model tried to hallucinate a similar example, producing a new [INST] item with a well-formatted "question", and then answered it. It could happen multiple times within one generation. We explicitly checked that such questions are not part of the validation set that we were using for benchmarking and thus not artefacts of bad processing from our side (one could suggest that multiple questions were passed as input instead of one, yet it was not the case). 
+
+We noticed similar behaviour with degenerations in our \texttt{qwen} experiments, also run in a similar \texttt{vllm} setup. 
+
+
+\paragraph{Qwen models} 
+%e.g. �Qwen2.5-Coder
+We are currently benchmarking \texttt{Qwen/Qwen2-VL-2B-Instruct}, and are planning to use this model as a basis for our soft prompting experiments. Qwen models are reportedly good for reasoning; in these models, multimodality starts at 2B parameters. 
 
 \begin{table}
 \centering
