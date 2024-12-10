@@ -145,49 +145,44 @@ For some datapoints, the image data is missing, while the answer can be deduced 
 Apart from the image field, missing values can occur in lecture and solution fields.
 As about 50\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
 
-\paragraph{Metrics}
+\section{Metrics}
 We evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, and cosine similarity and more.
 \subsection{Multiple choice Evaluation}
-Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. It was determined that the computation of the overall score should assign the highest weight (\textbf{60\%}) to the ability to provide correct answers (accuracy score), as this represents the most critical aspect of performance evaluation.
+Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. It was determined that the computation of the overall score should assign the highest weight (\textbf{50\%}) to the ability to provide correct answers (accuracy score), as this represents the most critical aspect of performance evaluation.
 \subsection{Answer Reasoning Evaluation}
 Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
 
-\subsubsection{BLEU}
+\paragraph{BLEU}
 BLEU-score (\cite{papineni2002bleu}) can measure how closely the model's generated explanation aligns with the human-authored explanation. BLEU-1 measures if the model uses the right scientific terms or key words (e.g., "photosynthesis," "temperature"). However, it ignores word order and logical progression, so it can’t evaluate reasoning or explanation quality. That is why BLEU-4 score is also computed in order to capture both vocabulary and the arrangement of words into meaningful phrases, evaluating fluency and coherence.
 Scientific explanations can often convey the same idea with different wording, making semantic similarity hard to capture.
 BLEU might penalize valid but rephrased or concise answers and it does not account for deeper meaning or logical correctness, which are crucial in reasoning tasks. Since this metric can give valuable insights on the generated outputs, we do not consider these scores as the most important and both BLEU-1 and BLEU-4 scores have \textbf{5\%} impact.
 
-\subsubsection{ROUGE}
-ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}, \ref{example:2}). It lead to the conclusion that this metric would not drastically affect the overall score and contribute (\textbf{5\%}).
+\paragraph{ROUGE}
+ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}). It lead to the conclusion that this metric would not drastically affect the overall score and contribute (\textbf{5\%}).
+
 \begin{example}
-\label{example:1} 
-\begin{itemize}
-    \item \textbf{Reference:} Water evaporates, cools, and condenses to form clouds.
-    \item \textbf{Candidate:} Water cools, evaporates, and forms clouds.
-\end{itemize}
-\end{example}
-\begin{example}
-\label{example:2}
+\label{example:1}
 \begin{itemize}
     \item \textbf{Reference:} Plants absorb sunlight to produce energy.
     \item \textbf{Candidate:} Sunlight is absorbed by plants to create energy.
 \end{itemize}
 \end{example}
+
 \subsubsubsection{Cosine similarity with Sentence Transformers}
 Cosine similarity using SentenceTransformer embeddings provides a robust method for evaluating model outputs in the ScienceQA dataset, focusing on the semantic alignment of generated explanations with references. It captures nuanced relationships and conceptual understanding, which gives more understanding of the generated outputs in comparison to ROUGE and BLEU scores and that is why it has more importance in final score computation. However, due to domain specificity it can miss some intricate cases like still considering high similarity of two sentences, even though it the reference can contain crucial information about carbon dioxide, while in the candidate sentence the answer was given in relation to oxygen reproduction.
-\subsubsection{METEOR}
+\paragraph{METEOR}
 METEOR (\cite{banerjee2005meteor}) evaluates text similarity based on precision, recall, and alignment of semantically meaningful components like synonyms and stems, making it well-suited for capturing the nuanced language used in scientific reasoning.
-By incorporating a weighted F-score and penalties for excessive mismatches, METEOR provides a balanced evaluation of fluency and accuracy, crucial for assessing LLM-generated answers on the Science QA Dataset. Due to these balanced text evaluation, this metric has \textbf{15\%} impact on the overall score.
+By incorporating a weighted F-score and penalties for excessive mismatches, METEOR provides a balanced evaluation of fluency and accuracy, crucial for assessing LLM-generated answers on the Science QA Dataset. Due to these balanced text evaluation, this metric has \textbf{10\%} impact on the overall score.
 % \subsubsection{Cosine similarity with SciBERT}
 % We extended the evaluation of cosine similarity using SciBERT (\cite{beltagy2019scibert}) embeddings. These vectors are more consistent with the domain-specific terminology and reasoning patterns present in the Science QA Dataset because it has been properly pre-trained on scientific literature.
 % SciBERT generates more accurate similarity embeddings because it better reflects the complex relationships between scientific concepts than general-purpose models like those in Sentence Transformers.
 % When assessing the logical and factual coherence of scientific reasoning, the structural and contextual semantics specific to scientific texts are reflected in the embeddings produced by SciBERT.
 % Assessments for jobs requiring sophisticated scientific understanding are more reliable when SciBERT is used for cosine similarity since it guarantees that the evaluation metric is domain-specific.
 
-\subsubsection{Cosine similarity with Sentence Transformers}
+\paragraph{Cosine similarity with Sentence Transformers}
 Sentence Transformer models are optimized for sentence-level embeddings, which capture the overall contextual similarity of answers more effectively, making them suitable for general-purpose evaluation tasks like scientific reasoning.
 Unlike SciBERT, which is tailored to scientific text and could have been used as sentence embedder, Sentence Transformers are pre-trained on diverse datasets, enabling them to generalize better to variations in phrasing and style present in the Science QA Dataset.
-Their ability to handle broader linguistic nuances ensures that the evaluation accounts for both semantic correctness and the logical flow of responses, which is essential when assessing reasoning across a wide range of scientific topics. That is the reason for using Sentence Transformer model for measurements of cosine similarity between the lecture material and annotated explanations and models' outputs with impact weight of \textbf{10\%}.
+Their ability to handle broader linguistic nuances ensures that the evaluation accounts for both semantic correctness and the logical flow of responses, which is essential when assessing reasoning across a wide range of scientific topics. That is the reason for using Sentence Transformer model for measurements of cosine similarity between the lecture material and annotated explanations and models' outputs with impact weight of \textbf{15\%}.
 
 
 
@@ -209,36 +204,31 @@ We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: li
 
 \subsection{Metrics}
 % description of metrics, why they were used + analytics of results
-\subsubsection{Accuracy}
+\paragraph{Accuracy}
 The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. `GPT-4` and `Gemini-1.5-flash-8B` consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models and  `Pixtral` model showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The `LLaVAModel1.5-7b`, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
 
-\subsubsection{Cosine similarity}
-Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. `Gemini-1.5` consistently achieves the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. `GPT-4` variants maintain steady scores across all settings, demonstrating robustness, while `Pixtral` and `LLaVAModel1.5-7b` show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that `Gemini-1.5` excels in semantic understanding across the dataset.
-\subsubsection{BLEU-1}
+\paragraph{BLEU-1}
 Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `Llave-1.5-flash-8B` model demonstrated superior performance, surpassing `GPT-4`, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly `LLaVAModel1.5-7b`, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
 
-\subsubsection{BLEU-4}
+\paragraph{BLEU-4}
 Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. `GPT-4o-mini`, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
 
-\subsubsection{METEOR}
+\paragraph{METEOR}
 METEOR scores reveal how well the models capture fluency, grammar, and word-level alignment with the references. Similar to cosine similarity, `Gemini-1.5` leads with the highest METEOR scores. Notably, `Pixtral` achieves relatively high METEOR scores in settings 3 and 4, despite moderate cosine similarity, highlighting its ability to produce fluent outputs. When concrete tasks without any additional helpful material are given to the models as an input, `gpt-4o-mini` model shows a capability of generating concise, fluent answers with correct relevant terminology and explanations.
 
-\subsubsection{ROUGE}
+\paragraph{ROUGE}
 The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  `LlaVAModel` anf `GPT-4` had highest ROUGE-scores on settings without solutions. Outputs of `GPT-4` without knowledge of the correct answer had higher ROUGE score than `GPT-4o-mini` given solutions in the input.
 
 
-\subsubsection{Overall score}
+\paragraph{Cosine similarity}
+Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. `Gemini-1.5` consistently achieves the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. `GPT-4` variants maintain steady scores across all settings, demonstrating robustness, while `Pixtral` and `LLaVAModel1.5-7b` show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that `Gemini-1.5` excels in semantic understanding across the dataset.
+
+\paragraph{Overall score}
 The overall results indicate that the `GPT` and `Gemini` model families demonstrate exceptional ability in extracting accurate answers. Notably, the `Gemini` models exhibited superior performance on datasets lacking relevant lecture information. The second-best performance on such "pure" datasets was achieved by `GPT-4`, with only a slight difference in overall score.
 
-\begin{figure}
-    \centering
-\includegraphics[width=0.8\textwidth]{images/overall_metric.pdf} 
-    \caption{Overals l metrics of various LLMs.}
-    \label{fig:metrics}
-\end{figure}
-
-\subsection{Summary}
-The benchmarking analysis highlights the superior performance of the `Gemini` and `GPT` model families, particularly in scenarios with combined lecture and solution data. The overall score indicates that both `Gemini` and `GPT` models excel at extracting accurate answers, with `Gemini` models showing a notable advantage on datasets lacking lecture information. `GPT-4` ranked second in performance on these "pure" datasets, with only a slight difference in overall score. `Pixtral `demonstrated strong fluency despite moderate semantic alignment, while `LLaVAModel1.5-7b` showed the lowest accuracy, particularly in minimal-context settings.
+\paragraph{Summary}
+Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The GPT-4o-mini model outperformed GPT-4 in multiple instances, indicating the efficacy of smaller, more targeted designs, even if GPT-4 continuously received excellent accuracy and informativeness scores. While LLaVAModel1.5-7b failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
+Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers.
 
 
 \subsection{Zero-shot Benchmarking on Validation}
@@ -275,7 +265,7 @@ Note: I later (after running the model) understood that the original model is th
 %\paragraph{Gemma2} -- Paligemma has seen ScienceQA
 
 \paragraph{Qwen models} 
-%e.g.  Qwen2.5-Coder
+%e.g. �Qwen2.5-Coder
 Current experiment
 
 \paragraph{Pixtral}
