@@ -138,71 +138,12 @@ Our soft prompting approach relies on prefix soft prompts as introduced in [TODO
 
 \section{Dataset}
 \label{dataset}
-This study is based on the ScienceQA dataset \cite{lu2022learn}. The dataset includes a variety of science-related multimodal multiple-choice questions together with annotations of the answers that provide relevant lectures and explanations in Nature Science, Language Science and Social Science.
-
-%Data points are structured as follows:
-%\begin{verbatim}
-%{'image': <PIL.PngImagePlugin.PngImageFile image mode=RGB size=200x202>,
-% 'question': 'Is diorite a mineral or a rock?',
-% 'choices': ['rock', 'mineral'],
-% 'answer': 0,
-% 'hint': 'Diorite has the following properties:\nno fixed crystal structure\nnaturally occurring\nnot a pure substance\ncoarse-grained texture\nsolid\nnot made by organisms',
-% 'task': 'closed choice',
-% 'grade': 'grade8',
-% 'subject': 'natural science',
-% 'topic': 'earth-science',
-% 'category': 'Rocks and minerals',
-% 'skill': 'Identify rocks and minerals',
-% 'lecture': 'Minerals are the building blocks of rocks. A rock can be made of one or more minerals.\nMinerals and rocks have the following properties:\nProperty | Mineral | Rock\nIt is a solid. | Yes | Yes\nIt is formed in nature. | Yes | Yes\nIt is not made by organisms. | Yes | Yes\nIt is a pure substance. | Yes | No\nIt has a fixed crystal structure. | Yes | No\nYou can use these properties to tell whether a substance is a mineral, a rock, or neither.\nLook closely at the last three properties:\nMinerals and rocks are not made by organisms.\nOrganisms make their own body parts. For example, snails and clams make their shells. Because they are made by organisms, body parts cannot be  minerals or rocks.\nHumans are organisms too. So, substances that humans make by hand or in factories are not minerals or rocks.\nA mineral is a pure substance, but a rock is not.\nA pure substance is made of only one type of matter.  Minerals are pure substances, but rocks are not. Instead, all rocks are mixtures.\nA mineral has a fixed crystal structure, but a rock does not.\nThe crystal structure of a substance tells you how the atoms or molecules in the substance are arranged. Different types of minerals have different crystal structures, but all minerals have a fixed crystal structure. This means that the atoms and molecules in different pieces of the same type of mineral are always arranged the same way.\nHowever, rocks do not have a fixed crystal structure. So, the arrangement of atoms or molecules in different pieces of the same type of rock may be different!',
-% 'solution': 'The properties of diorite match the properties of a rock. So, diorite is a rock.'}
-%\end{verbatim}
-
-For some datapoints, the image data is missing, while the answer can be deduced from text alone (e.g. questions on 'subject': 'language science', 'topic': 'figurative-language', 'skill': 'Interpret figures of speech' (e.g. irony recognition). 
-
-For other datapoints, however, the image data can be missing, although required to make an answer.
-%, e.g.
-%\begin{verbatim}
-%{'image': None,
-% 'question': 'What information supports the conclusion that Rick inherited this trait?',
-% 'choices': ["Rick's coworker also has curly hair.",
-%  "Rick's biological father has curly hair.",
-%  'Rick and his biological parents have brown hair.'],
-% 'answer': 1,
-% 'hint': 'Read the description of a trait.\nRick has curly hair.',
-% 'task': 'closed choice',
-% 'grade': 'grade7',
-% 'subject': 'natural science',
-% 'topic': 'biology',
-% 'category': 'Genes to traits',
-% 'skill': 'Inherited and acquired traits: use evidence to support a statement',
-% 'lecture': "Organisms, including people, have both inherited and acquired traits. Inherited and acquired traits are gained in different ways.\nInherited traits are passed down from biological parents to their offspring through genes. Genes are pieces of hereditary material that contain the instructions that affect inherited traits. Offspring receive their genes, and therefore gain their inherited traits, from their biological parents. Inherited traits do not need to be learned.\nAcquired traits are gained during a person's life. Some acquired traits, such as riding a bicycle, are gained by learning. Other acquired traits, such as scars, are caused by the environment. Parents do not pass acquired traits down to their offspring.",
-% 'solution': ''}
-%\end{verbatim}
-
-Apart from the image field, missing values can occur in lecture and solution fields. The statistics in table \ref{table:dataset-stats} give an overview on the amount of problematic datapoints. 
-
-Finally, hint can be missing, e.g. the text-only task 367 on subject language science: "What is the source of allusion in the sentence below? Edward picked up his pace on the trail as his spidey sense began to tingle" with choices ["Italian history", "a comic book"], or the text-only task 3 on the topic of capitalization: "Which correctly shows the title of a play?" with choices ["A breath of Fresh Air", "A Breath of Fresh Air"]. 
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{ll}\toprule
-	missing & frequency \\\midrule
-	solution & 9.3\% \\
-	lecture & 15.7\% \\
-	solution and/or lecture & 24.2\% \\
-	image & 50.6\%\\\bottomrule
-\end{tabular}
-\caption{Defect datapoints in dataset}
-\label{table:dataset-stats}
-\end{table}
-
-\paragraph{Retained data} As 50.6\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
-For now, we will only work with datapoints with non-empty solution AND with non-empty lecture. All the other datapoints are disregarded,
-%\begin{verbatim}
-%filtered\_validation\_data = validation\_data.filter(lambda example: example["lecture"] != "" and example["solution"] != "")
-%\end{verbatim}
-which results in \textbf{3216} datapoints kept in validation data.  
-
+This study is based on the ScienceQA dataset \cite{lu2022learn}. The ScienceQA dataset is a benchmark for multimodal reasoning in science, consisting of over 21,000 questions across topics like natural science, social science and language science. Each question includes textual prompts, optionally visual aids (e.g., diagrams, charts), answer options, detailed explanations and lecture context. The dataset spans various difficulty levels, enabling evaluation of models on both basic and advanced scientific reasoning, reaching from elementary to high school level questions.
+ScienceQA supports tasks such as multimodal comprehension, answer explanation generation, and educational AI development. Its high-quality annotations and diverse content make it an ideal benchmark for assessing models in science education and reasoning. In our experiments, we leveraged the dataset to assess knowledge distillation under diverse scientific scenarios, focusing on the ability to distill the reasoning capabilities.
+Irregularities:
+For some datapoints, the image data is missing, while the answer can be deduced from text alone.
+Apart from the image field, missing values can occur in lecture and solution fields.
+As about 50\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
 
 \paragraph{Metrics}
 We evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, and cosine similarity and more.
