@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{booktabs} % for professional tables
+\usepackage{amsmath}
 
 % hyperref makes hyperlinks in the resulting PDF.
 % If your build breaks (sometimes temporarily if a hyperlink spans a page)
@@ -91,6 +92,7 @@ Scientific machine reasoning is the application of AI techniques to simulate sci
 For our project, we intend to compare different approaches around generative large language models to generate solutions for school science problems. On an existing benchmark with human solutions, we are planning to compare: a pure LLM with zero-shot and few-shot prompting (and possibly some more fine-grained prompting techniques), an agentic approach with ability to query external resources like textbooks in physics, maths etc, and soft-prompting techniques. We then plan to attempt knowledge distillation to a smaller LLM. 
 
 \section{Motivation}
+Recent developments in foundation models have shown remarkable performance on challenges that call for contextual awareness and scientific reasoning. However, these models are often resource-intensive, which limitates their scalability and accessibility for broader applications. Through the transfer of reasoning capacities from large models to smaller, more efficient ones, this study focuses on the possibility of knowledge distillation to address these issues. By applying this approach to the Science QA datase, we want to close the gap between performance and usefulness by enabling lightweight models to handle challenging reasoning tasks with high accuracy and robustness.
 \label{motivation}
 \textbf{TODO}
 
@@ -184,6 +186,18 @@ Sentence Transformer models are optimized for sentence-level embeddings, which c
 Unlike SciBERT, which is tailored to scientific text and could have been used as sentence embedder, Sentence Transformers are pre-trained on diverse datasets, enabling them to generalize better to variations in phrasing and style present in the Science QA Dataset.
 Their ability to handle broader linguistic nuances ensures that the evaluation accounts for both semantic correctness and the logical flow of responses, which is essential when assessing reasoning across a wide range of scientific topics. That is the reason for using Sentence Transformer model for measurements of cosine similarity between the lecture material and annotated explanations and models' outputs with impact weight of \textbf{15\%}.
 
+\paragraph{Overall score}
+In order to obtain a numeric description of the model's performance, we set the follwoing metric that includes previously mentioned metrics with the given importance weights:
+\begin{equation*}
+\begin{split}
+\text{Overall Score} = & \, 0.6 \cdot \text{Accuracy} + 0.05 \cdot \text{BLEU-1} \\
+& + 0.5 \cdot \text{BLEU-4} + 0.05 \cdot \text{ROUGE} \\
+& + 0.15 \cdot \text{METEOR} \\
+& + 0.1 \cdot \text{Cosine Similarity}
+\end{split}
+\end{equation*}
+
+
 
 
 \section{Experiments}
@@ -200,34 +214,41 @@ We start by zero-shot benchmarking existing multimodal models in four simple pro
 
 For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
 
-We evaluate: OpenAI, Gemini, MistralAI, as well as small local models. %TODO: list models. 
+We evaluate: 
+\begin{enumerate}
+	\item OpenAI models: \texttt{GPT-4}, \texttt{GPT-4o-mini}
+	\item MistralAI model: \texttt{Pixtral-12b-2409}
+    \item Gemini models: \texttt{Gemini-1.5-flash}, \texttt{Gemini-1.5-flash-8B}
+	\item Llava model:  \texttt{llava-hf/llava-1.5-7b-hf}
+\end{enumerate}
+
 
 \subsection{Metrics}
 % description of metrics, why they were used + analytics of results
 \paragraph{Accuracy}
-The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. `GPT-4` and `Gemini-1.5-flash-8B` consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models and  `Pixtral` model showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The `LLaVAModel1.5-7b`, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
+The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. \texttt{GPT-4} and \texttt{Gemini-1.5-flash-8B} consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models and  \texttt{Pixtral-12b-2409} model showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The \texttt{LLaVAModel1.5-7b}, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
 
 \paragraph{BLEU-1}
-Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `Llave-1.5-flash-8B` model demonstrated superior performance, surpassing `GPT-4`, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly `LLaVAModel1.5-7b`, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
+Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `Llave-1.5-flash-8B` model demonstrated superior performance, surpassing \texttt{GPT-4}, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly \texttt{LLaVAModel1.5-7b}, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
 
 \paragraph{BLEU-4}
-Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. `GPT-4o-mini`, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
+Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. \texttt{GPT-4o-mini}, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
 
 \paragraph{METEOR}
-METEOR scores reveal how well the models capture fluency, grammar, and word-level alignment with the references. Similar to cosine similarity, `Gemini-1.5` leads with the highest METEOR scores. Notably, `Pixtral` achieves relatively high METEOR scores in settings 3 and 4, despite moderate cosine similarity, highlighting its ability to produce fluent outputs. When concrete tasks without any additional helpful material are given to the models as an input, `gpt-4o-mini` model shows a capability of generating concise, fluent answers with correct relevant terminology and explanations.
+METEOR scores reveal how well the models capture fluency, grammar, and word-level alignment with the references. Similar to cosine similarity, {Gemini-1.5-flash} leads with the highest METEOR scores. Notably, \texttt{Pixtral-12b-2409} achieves relatively high METEOR scores in settings 3 and 4, despite moderate cosine similarity, highlighting its ability to produce fluent outputs. When concrete tasks without any additional helpful material are given to the models as an input, \texttt{GPT-4o-mini} model shows a capability of generating concise, fluent answers with correct relevant terminology and explanations.
 
 \paragraph{ROUGE}
-The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  `LlaVAModel` anf `GPT-4` had highest ROUGE-scores on settings without solutions. Outputs of `GPT-4` without knowledge of the correct answer had higher ROUGE score than `GPT-4o-mini` given solutions in the input.
+The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  \texttt{LLaVAModel} anf \texttt{GPT-4} had highest ROUGE-scores on settings without solutions. Outputs of \texttt{GPT-4} without knowledge of the correct answer had higher ROUGE score than \texttt{GPT-4o-mini} given solutions in the input.
 
 
 \paragraph{Cosine similarity}
-Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. `Gemini-1.5` consistently achieves the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. `GPT-4` variants maintain steady scores across all settings, demonstrating robustness, while `Pixtral` and `LLaVAModel1.5-7b` show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that `Gemini-1.5` excels in semantic understanding across the dataset.
+Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. {Gemini-1.5-flash} consistently achieves the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. \texttt{GPT-4} variants maintain steady scores across all settings, demonstrating robustness, while \texttt{Pixtral-12b-2409} and \texttt{LLaVAModel1.5-7b} show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that {Gemini-1.5-flash} excels in semantic understanding across the dataset.
 
 \paragraph{Overall score}
-The overall results indicate that the `GPT` and `Gemini` model families demonstrate exceptional ability in extracting accurate answers. Notably, the `Gemini` models exhibited superior performance on datasets lacking relevant lecture information. The second-best performance on such "pure" datasets was achieved by `GPT-4`, with only a slight difference in overall score.
+The overall results indicate that the `GPT` and `Gemini` model families demonstrate exceptional ability in extracting accurate answers. Notably, the `Gemini` models exhibited superior performance on datasets lacking relevant lecture information. The second-best performance on such "pure" datasets was achieved by \texttt{GPT-4}, with only a slight difference in overall score.
 
 \paragraph{Summary}
-Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The GPT-4o-mini model outperformed GPT-4 in multiple instances, indicating the efficacy of smaller, more targeted designs, even if GPT-4 continuously received excellent accuracy and informativeness scores. While LLaVAModel1.5-7b failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
+Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The \texttt{GPT-4o-mini} model outperformed \texttt{GPT-4} in multiple instances, indicating the efficacy of smaller, more targeted designs, even if \texttt{GPT-4} continuously received excellent accuracy and informativeness scores. While \texttt{LLaVAModel1.5-7b} failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
 Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers.
 
 
