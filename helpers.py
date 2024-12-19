@@ -1,3 +1,7 @@
+from PIL import Image
+from torchvision import transforms
+
+
 def get_question_text(problem):
     question = problem['question']
     return question
@@ -38,3 +42,24 @@ def build_prompt(question_data, use_lecture=False, use_solution=False):
     if image:
         prompt.append(image)
     return prompt
+
+def build_message(row):
+    image = row['image'] if row['image'] else Image.new("RGB", (224, 224), (0, 0, 0))
+    """transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+    image_tensor = transform(image) if image else transform(Image.new("RGB", (224, 224), (0, 0, 0)))"""
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": image,
+                },
+                {"type": "text", "text": row['input']},
+            ],
+        }
+    ]
+    return messages
