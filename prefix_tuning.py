@@ -23,13 +23,15 @@ class PrefixTuningModel(nn.Module):
         self.tokenizer = tokenizer
         self.prefix_tuning = PrefixTuning(self.model.config, prefix_length)
 
-    def forward(self, input_ids, attention_mask, labels=None):
-        inputs_embeds = self.model.get_input_embeddings()(input_ids)
+    def forward(self, inputs, labels):
+        inputs_embeds = self.model.get_input_embeddings()(inputs["input_ids"])
         # Add Prefix
         inputs_embeds = self.prefix_tuning(inputs_embeds)
 
         # Modify attention mask for prefix
-        prefix_mask = torch.ones((input_ids.size(0), self.prefix_tuning.prefix_length), device=input_ids.device)
-        attention_mask = torch.cat([prefix_mask, attention_mask], dim=1)
+        prefix_mask = torch.ones((inputs["input_ids"].size(0), self.prefix_tuning.prefix_length), device=inputs["input_ids"].device)
+        attention_mask = torch.cat([prefix_mask, inputs["attention_mask"]], dim=1)
+        #inputs["input_ids"] = inputs_embeds
+        #inputs["attention_mask"] = attention_mask
 
-        return self.model(inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels)
+        return self.model(**inputs, labels=labels)

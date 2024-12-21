@@ -29,7 +29,7 @@ def build_prompt(question_data, use_lecture=False, use_solution=False):
     question = get_question_text(question_data)
     choices = get_choice_text(question_data, [choice_num for choice_num in range(5)])
     hint = get_context_text(question_data, False)
-    image = question_data['image']
+    #image = question_data['image']
     task = question_data['task']
     input_prompt = f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'
     if use_lecture:
@@ -39,24 +39,18 @@ def build_prompt(question_data, use_lecture=False, use_solution=False):
         solution = f'\n Solution: {question_data["solution"]}'
         input_prompt += solution
     prompt = [input_prompt]
-    if image:
-        prompt.append(image)
+    #if image:
+    #    prompt.append(image)
     return prompt
 
 def build_message(row):
-    image = row['image'] if row['image'] else Image.new("RGB", (224, 224), (0, 0, 0))
-    """transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor()
-    ])
-    image_tensor = transform(image) if image else transform(Image.new("RGB", (224, 224), (0, 0, 0)))"""
     messages = [
         {
             "role": "user",
             "content": [
                 {
                     "type": "image",
-                    "image": image,
+                    "image": row["image"],
                 },
                 {"type": "text", "text": row['input']},
             ],
