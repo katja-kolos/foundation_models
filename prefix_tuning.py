@@ -20,8 +20,13 @@ class PrefixTuningModel(nn.Module):
     def __init__(self, model, tokenizer, prefix_length=10):
         super().__init__()
         self.model = model
+        self.freeze_main_model()
         self.tokenizer = tokenizer
         self.prefix_tuning = PrefixTuning(self.model.config, prefix_length)
+
+    def freeze_main_model(self):
+        for param in self.model.parameters():
+            param.requires_grad = False
 
     def forward(self, inputs, labels):
         inputs_embeds = self.model.get_input_embeddings()(inputs["input_ids"])
@@ -31,7 +36,5 @@ class PrefixTuningModel(nn.Module):
         # Modify attention mask for prefix
         prefix_mask = torch.ones((inputs["input_ids"].size(0), self.prefix_tuning.prefix_length), device=inputs["input_ids"].device)
         attention_mask = torch.cat([prefix_mask, inputs["attention_mask"]], dim=1)
-        #inputs["input_ids"] = inputs_embeds
-        #inputs["attention_mask"] = attention_mask
 
-        return self.model(**inputs, labels=labels)
+        return self.model(inputs_embeds=inputs_embeds, attention_mask=attention_mask, pixel_values=inputs["pixel_values"], labels=labels)
