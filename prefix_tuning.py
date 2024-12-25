@@ -36,5 +36,7 @@ class PrefixTuningModel(nn.Module):
         # Modify attention mask for prefix
         prefix_mask = torch.ones((inputs["input_ids"].size(0), self.prefix_tuning.prefix_length), device=inputs["input_ids"].device)
         attention_mask = torch.cat([prefix_mask, inputs["attention_mask"]], dim=1)
+        print(f"Input Embed dims: {inputs_embeds.size()}")
+        print(f"Label: {labels.size()}")
 
         return self.model(inputs_embeds=inputs_embeds, attention_mask=attention_mask, pixel_values=inputs["pixel_values"], labels=labels)
