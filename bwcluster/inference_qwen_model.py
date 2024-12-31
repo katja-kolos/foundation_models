@@ -33,6 +33,8 @@ from vllm.multimodal import MultiModalDataBuiltins
 from huggingface_hub import login
 from datasets import load_dataset
 
+from PIL import Image
+
 ## UTILS: LOAD MODEL
 # login to hf -- mistral does not allow unauthorized downloads
 def login_to_hf():
@@ -59,8 +61,7 @@ def prepare_model(model_name, tensor_parallel_size, cpu_offload_gb, max_model_le
               tensor_parallel_size=tensor_parallel_size,  # Can be adjusted for multi-GPU setup
               cpu_offload_gb=cpu_offload_gb,
               dtype="float16",
-              # dtype="bfloat16", #"float32",
-              max_model_len=max_model_len # Setting to same number as SamplingParams
+              # max_model_len=max_model_len 
              )
 
     logging.info("Load model: done")
@@ -123,51 +124,41 @@ def process_datapoint_at_setting(example, idx, setting, llm, model_name, samplin
         lecture=example["lecture"], 
         solution=example["solution"], 
         prompt_answer_and_solution=prompt_answer_and_solution)
-    
   
-    # default processer
-    # processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
-    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct", min_pixels=256*28*28, max_pixels=512*28*28, padding_side="right")
+    processor = AutoProcessor.from_pretrained(model_name, min_pixels=256*28*28, max_pixels=512*28*28, padding_side="right")
 
-    if image:
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "image": image,
-                    },
-                    {"type": "text", "text": text_input},
-                ],
-            }
-        ]
-    else:
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": text_input},
-                ],
-            }
-        ]
+    #create empty image if none is given
+    if not image:
+        image = Image.new("RGB", (224, 224), (0, 0, 0))
+        
+    # Simulate chat interaction
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": image,
+                },
+                {"type": "text", "text": text_input},
+            ],
+        }
+    ]
     
     # Preparation for inference
     text = processor.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=False
+        messages, tokenize=False, add_generation_prompt=True
     )
-    image_inputs, video_inputs = process_vision_info(messages)
-    inputs = processor(
-        text=[text],
-        images=image_inputs,
-        videos=video_inputs,
-        padding=True,
-        return_tensors="pt",
-    )
-    inputs = inputs.to("cuda")
     
-    outputs = llm.generate(inputs, sampling_params=sampling_params)
+    logging.info(text)
     
+    outputs = llm.generate({
+        "prompt": text,
+        "multi_modal_data": {
+            "image": [image]
+        },
+    }, sampling_params=sampling_params)    
+
     answer = ''
     for o in outputs:
         answer += o.outputs[0].text #normally expecting one output in 1 by 1 processing
@@ -186,8 +177,7 @@ def main():
         "--model_name",
         type=str,
         default="Qwen/Qwen2-VL-2B-Instruct",
-        # default="mistral-community/pixtral-12b", #was hoping community edition would help compatibility with vllm and current script
-        help="The name of the model to download and use. Default: mistralai/Pixtral-12B-2409",
+        help="The name of the model to download and use. Default: Qwen/Qwen2-VL-2B-Instruct",
     )
     parser.add_argument(
         "--ngpus",
@@ -206,8 +196,8 @@ def main():
     parser.add_argument(
         "--maxtokens",
         type=int,
-        default=8192,
-        help="max_tokens of SamplingParams AND max_model_len at LLM initialization. Default: 8192",
+        default=2048,
+        help="max_tokens of max_model_len at LLM initialization. Default: 2048",
     )
 
     parser.add_argument(
@@ -241,13 +231,19 @@ def main():
     args = parser.parse_args()
 
     # Log in to huggingface 
-    login_to_hf()
+    # login_to_hf() #not necessary for qwen
+    
     # Load and prepare data
     data = prepare_data(dataset_name=args.dataset, split=args.split, resume_index=args.resume)
 
     # Load and inference the model
     llm = prepare_model(args.model_name, tensor_parallel_size=args.ngpus, cpu_offload_gb=args.cpuRAM, max_model_len=args.maxtokens)
-    sampling_params = SamplingParams(max_tokens=args.maxtokens)
+    
+    sampling_params = SamplingParams(
+        max_tokens=args.maxtokens, #max_new_tokens=128 in model card
+        stop=["}\n"],
+        include_stop_str_in_output=True,
+    )
     data.map(lambda example, idx: process_datapoint_at_setting(
         example, idx, 
         args.setting, 
