@@ -22,7 +22,7 @@ class PrefixTuning(nn.Module):
         prefix = self.prefix_embeddings
         prefix = self.mlp(prefix)
         prefix = prefix.unsqueeze(0).expand(batch_size, -1, -1)
-        # Note: Embeddings can be made up by the MLP + paper uses them as past_key_values
+        # Note: Embeddings can be made up by the MLP + paper uses them as past_key_values.
         return torch.cat([prefix, inputs_embeds], dim=1)
 
 
