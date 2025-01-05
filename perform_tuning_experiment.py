@@ -41,7 +41,7 @@ logging.basicConfig(
 )
 
 # CONSTANTS
-NUM_EPOCHS_FT = 100
+NUM_EPOCHS_FT = 5
 BATCH_SIZE = 4
 logging.info(f'Set constants: NUM_EPOCHS_FT={NUM_EPOCHS_FT}, BATCH_SIZE={BATCH_SIZE}')
 
@@ -64,6 +64,8 @@ df_train_label['message'] = df_train_label.apply(lambda row: build_message(row),
 
 ### val data
 df_val = pd.DataFrame(load_dataset('derek-thomas/ScienceQA', split='validation'))
+# filter validation data; #TODO: would it be wiser to validate on exactly the same subset used for benchmarking? or to have as much data as possible?
+df_val = df_val[df_val['solution'] != ''].reset_index()
 df_val['image'] = df_val.apply(lambda row: row['image'] if row['image'] else Image.new("RGB", (224, 224), (0, 0, 0)), axis=1)
 df_val['input'] = df_val.apply(lambda row: build_prompt(row)[0], axis=1)
 df_val['message'] = df_val.apply(lambda row: build_message(row), axis=1)
@@ -83,7 +85,7 @@ def preprocess_input_qwen(tokenizer, processor, prompts, texts, images, y, devic
     )
     max_length = inputs["input_ids"].size(1) + 10 # +10 for later prefix
     labels = tokenizer(y, padding="max_length", truncation=True, max_length=max_length, return_tensors="pt")["input_ids"]
-    return inputs.to(device, dtype=torch.bfloat16), labels.to(device, dtype=torch.bfloat16)
+    return inputs.to(device, dtype=torch.bfloat16), labels.to(device)
 
 def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_val, preprocess_func):
     train_errors = []
@@ -95,11 +97,21 @@ def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_v
         num_samples = 0
         for prompts, texts, images, y in dataloader_train:
             inputs, labels = preprocess_func(tokenizer, processor, prompts, texts, images, y, device)
+            logging.info("inputs")
+            logging.info(inputs)
+            logging.info("labels")
+            logging.info(labels)
+
             optimizer.zero_grad()
+            logging.info("forward pass")
             outputs = model(inputs, labels=labels)
-            #output_ids = outputs.logits.argmax(-1)
-            #output_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)
+            # detailed look into
+            output_ids = outputs.logits.argmax(-1)
+            output_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)
+            logging.info(output_text)
+
             loss = outputs.loss
+            logging.info(f"loss: {loss}")
             loss.backward()
             optimizer.step()
             error += loss.item() * len(texts)
@@ -107,10 +119,11 @@ def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_v
             del labels, inputs
             gc.collect()
             torch.cuda.empty_cache()
+            logging.info("backward pass done")
         error /= num_samples
-        logger.info(f'Error after epoch {epoch}: {error}')
+        logging.info(f'Error after epoch {epoch}: {error}')
         train_errors.append((epoch, error))
-        if epoch % 10:
+        if epoch % 5:
             val_error = 0
             num_samples = 0
             for prompts, texts, images, y in dataloader_val:
@@ -126,7 +139,7 @@ def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_v
                 gc.collect()
                 torch.cuda.empty_cache()
             val_error /= num_samples
-            logger.info(f'Validation error after epoch {epoch}: {val_error}')
+            logging.info(f'Validation error after epoch {epoch}: {val_error}')
             val_errors.append((epoch, val_error))
     return train_errors, val_error
 

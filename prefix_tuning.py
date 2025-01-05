@@ -17,24 +17,35 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 class PrefixTuning(nn.Module):
     def __init__(self, config, prefix_length=10):
         super().__init__()
-        self.prefix_length = prefix_length
-        self.hidden_size = config.hidden_size
+        self.prefix_length = int(prefix_length)
+        self.hidden_size = int(config.hidden_size)
         #P'_theta
-        self.prefix_embedding = nn.Embedding(prefix_length, config.hidden_size // 2)
+        #self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2).to(device='cuda', dtype=torch.bfloat16))
+        #self.prefix_embedding = nn.Embedding(prefix_length, config.hidden_size // 2).to(device='cuda', dtype=torch.bfloat16)
+        self.prefix_dim = int(config.hidden_size // 2) #floor division should return int but just in case because I don't know anymore what is wrong
+        print(f"self.prefix_length: {self.prefix_length}, {type(self.prefix_length)}")
+        print(f"self.prefix_dim: {self.prefix_dim}, {type(self.prefix_dim)}")
+        self.prefix_embedding = nn.Parameter(torch.randn(self.prefix_length, self.prefix_dim).to(device='cuda', dtype=torch.bfloat16))
+        print(f"self.prefix_embedding.size()")
+        print(self.prefix_embedding.size())
         #MLP_theta
         self.mlp = nn.Sequential(
-            nn.Linear(config.hidden_size // 2, config.hidden_size, dtype=torch.bfloat16),
+            nn.Linear(self.prefix_dim, self.hidden_size, dtype=torch.bfloat16),
             nn.Tanh(),
-            nn.Linear(config.hidden_size, config.hidden_size, dtype=torch.bfloat16)
+            nn.Linear(self.hidden_size, self.hidden_size, dtype=torch.bfloat16)
         )
 
-    def forward(self, inputs_embeds):
-        batch_size = inputs_embeds.size(0)
-        prefix = self.prefix_embedding(inputs_embeds)
+    def forward(self, input_embeds):
+        print("input_embeds")
+        print(input_embeds)
+        print(type(input_embeds))
+        batch_size = input_embeds.size(0)
+        print(f"batch_size: {batch_size}")
+        prefix = self.prefix_embedding
         prefix = self.mlp(prefix)
         prefix = prefix.unsqueeze(0).expand(batch_size, -1, -1)
         # Note: Embeddings can be made up by the MLP + paper uses them as past_key_values.
-        return torch.cat([prefix, inputs_embeds], dim=1)
+        return torch.cat([prefix, input_embeds], dim=1)
 
 
 class PrefixTuningModel(nn.Module):
