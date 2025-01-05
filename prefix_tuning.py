@@ -1,7 +1,18 @@
 import torch
+
 from torch import nn
+from torch.utils.data import Dataset
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
+# Prefix Tuning Components are defined here
+# Inspiration: https://arxiv.org/pdf/2101.00190
+# Idea: avoid fine-tuning whole (generative) model; instead, learn a prefix for the specific task.
+# Prefix is of fixed length, e.g. 10 tokens, that are learnt from train dataset.
+# Current design decisions: 
+# 1) these tokens are prepended to normal input with the hope of better explaining the taski.
+# 2) the tokens do not directly map to some existing vocabulary items: the additional MLP layer generates embeddings and not input_ids, those embeddings might not correspond to anything meaningful
+# we might further study if initializing from existing words leads to better results
+# Further work: directly work with past_key_values instead of explicit prepending
 
 class PrefixTuning(nn.Module):
     def __init__(self, config, prefix_length=10):
@@ -9,17 +20,17 @@ class PrefixTuning(nn.Module):
         self.prefix_length = prefix_length
         self.hidden_size = config.hidden_size
         #P'_theta
-        self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2))
+        self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2).to(device='cuda', dtype=torch.bfloat16))
         #MLP_theta
         self.mlp = nn.Sequential(
-            nn.Linear(config.hidden_size // 2, config.hidden_size),
+            nn.Linear(config.hidden_size // 2, config.hidden_size, dtype=torch.bfloat16),
             nn.Tanh(),
-            nn.Linear(config.hidden_size, config.hidden_size)
+            nn.Linear(config.hidden_size, config.hidden_size, dtype=torch.bfloat16)
         )
 
     def forward(self, inputs_embeds):
         batch_size = inputs_embeds.size(0)
-        prefix = self.prefix_embeddings
+        prefix = self.prefix_param
         prefix = self.mlp(prefix)
         prefix = prefix.unsqueeze(0).expand(batch_size, -1, -1)
         # Note: Embeddings can be made up by the MLP + paper uses them as past_key_values.
@@ -56,3 +67,19 @@ class PrefixTuningModel(nn.Module):
                                  device=inputs["input_ids"].device)
         attention_mask = torch.cat([prefix_mask, inputs["attention_mask"]], dim=1)
         return self.model.generate(inputs_embeds=inputs_embeds, attention_mask=attention_mask, pixel_values=inputs["pixel_values"], max_new_tokens=max_new_tokens)
+
+class PrefixDataset(Dataset):
+    def __init__(self, df):
+        self.df = df
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+
+        return row['input'], row['message'], row['image'], row['solution']
+
+def prefix_collate(batch):
+    input, message, image, y = zip(*batch)
+    return input, message, image, y
