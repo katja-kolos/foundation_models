@@ -20,7 +20,7 @@ class PrefixTuning(nn.Module):
         self.prefix_length = prefix_length
         self.hidden_size = config.hidden_size
         #P'_theta
-        self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2).to(device='cuda', dtype=torch.bfloat16))
+        self.prefix_embedding = nn.Embedding(prefix_length, config.hidden_size // 2)
         #MLP_theta
         self.mlp = nn.Sequential(
             nn.Linear(config.hidden_size // 2, config.hidden_size, dtype=torch.bfloat16),
@@ -30,7 +30,7 @@ class PrefixTuning(nn.Module):
 
     def forward(self, inputs_embeds):
         batch_size = inputs_embeds.size(0)
-        prefix = self.prefix_param
+        prefix = self.prefix_embedding(inputs_embeds)
         prefix = self.mlp(prefix)
         prefix = prefix.unsqueeze(0).expand(batch_size, -1, -1)
         # Note: Embeddings can be made up by the MLP + paper uses them as past_key_values.
