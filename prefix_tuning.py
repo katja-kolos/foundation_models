@@ -20,12 +20,12 @@ class PrefixTuning(nn.Module):
         self.prefix_length = prefix_length
         self.hidden_size = config.hidden_size
         #P'_theta
-        self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2))
+        self.prefix_param = nn.Parameter(torch.randn(prefix_length, config.hidden_size // 2).to(device='cuda', dtype=torch.bfloat16))
         #MLP_theta
         self.mlp = nn.Sequential(
-            nn.Linear(config.hidden_size // 2, config.hidden_size),
+            nn.Linear(config.hidden_size // 2, config.hidden_size, dtype=torch.bfloat16),
             nn.Tanh(),
-            nn.Linear(config.hidden_size, config.hidden_size)
+            nn.Linear(config.hidden_size, config.hidden_size, dtype=torch.bfloat16)
         )
 
     def forward(self, inputs_embeds):

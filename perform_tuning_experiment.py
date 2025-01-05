@@ -147,7 +147,7 @@ logging.info(f'Model: {model_name}')
 
 model = AutoModelForImageTextToText.from_pretrained(
     model_name,
-    torch_dtype="bfloat16" #"auto"
+    torch_dtype=torch.bfloat16 #"auto"
 )
 logging.info('Loaded model')
 tokenizer = AutoTokenizer.from_pretrained(model_name)
