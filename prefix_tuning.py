@@ -96,6 +96,8 @@ class PrefixTuningPastKeyValues(nn.Module):
         bsz, seqlen, _ = past_key_values.shape
         past_key_values = past_key_values.view(bsz, seqlen, 2*self.match_n_layer, self.match_n_head, self.match_n_embd)
         past_key_values = past_key_values.permute([2, 0, 3, 1, 4]).split(2)
+        for (key, val) in past_key_values:
+            print(f"Layer: {key.shape}, {val.shape}")
         past_key_values = DynamicCache.from_legacy_cache(past_key_values)
         return past_key_values
 

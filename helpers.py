@@ -10,7 +10,6 @@ def login_to_hf():
         raise FileNotFoundError("HuggingFace token file not found. Please ensure 'hf_token' exists.")
         return
     login(token=token)
-    logging.info("Login with token: done")
 
 
 def get_question_text(problem):
@@ -64,3 +63,4 @@ def build_message(row):
         }
     ]
     return messages
+
