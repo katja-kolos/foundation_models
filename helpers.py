@@ -1,5 +1,16 @@
 from PIL import Image
 from torchvision import transforms
+from huggingface_hub import login
+
+def login_to_hf():
+    try:
+        with open("hf_token", "r") as f:
+            token = f.read().strip()
+    except FileNotFoundError:
+        raise FileNotFoundError("HuggingFace token file not found. Please ensure 'hf_token' exists.")
+        return
+    login(token=token)
+    logging.info("Login with token: done")
 
 
 def get_question_text(problem):
