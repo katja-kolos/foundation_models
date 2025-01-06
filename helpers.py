@@ -29,7 +29,6 @@ def build_prompt(question_data, use_lecture=False, use_solution=False):
     question = get_question_text(question_data)
     choices = get_choice_text(question_data, [choice_num for choice_num in range(5)])
     hint = get_context_text(question_data, False)
-    #image = question_data['image']
     task = question_data['task']
     input_prompt = f'Question: {question}\n Task: {task}\n Choices: {choices}\n Hint: {hint}'
     if use_lecture:
@@ -38,10 +37,7 @@ def build_prompt(question_data, use_lecture=False, use_solution=False):
     if use_solution and question_data["solution"]:
         solution = f'\n Solution: {question_data["solution"]}'
         input_prompt += solution
-    prompt = [input_prompt]
-    #if image:
-    #    prompt.append(image)
-    return prompt
+    return input_prompt
 
 def build_message(row):
     messages = [
