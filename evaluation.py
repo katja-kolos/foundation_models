@@ -1,35 +1,122 @@
-import pandas as pd
-import json, ast, re
-from datasets import load_dataset
+import re
+from rouge import Rouge
+from nltk.translate.bleu_score import sentence_bleu
+from sentence_transformers import util
+import evaluate
+meteor = evaluate.load("meteor")
 from sentence_transformers import SentenceTransformer
-from evaluations import caculate_bleu, caculate_rouge, caculate_similariry
-from evaluate_acc import *
+
+def extract_explanation(text):
+    text = re.sub(r"The answer is [A-Z]. BECAUSE: ", "", text)
+    return text
 
 
-def eval(RES_DIR:str, MODEL_NAME:str):
-    for i in range(1,5):
-        df = pd.read_csv(f"{RES_DIR}/{MODEL_NAME}_val_output_setting_{i}.csv", sep="\t")
-        df = pd.read_excel("../res/see.xlsx")
-        answer_pred_col, solution_pred_col = "answer_output", "solution_output"
-        df[[answer_pred_col, solution_pred_col]] = df["output"].apply(string2json).apply(pd.Series)
-        df[answer_pred_col] = df[answer_pred_col].apply(lambda x: int(x))
-        answer_preds = df[answer_pred_col].tolist()
-        solution_preds =  df[solution_pred_col].tolist()
-        scores = get_scores(df)
-        print_scores(scores)
-        metrics = calculate_metrics_solutions(solution_preds , df)
-        scores.update(metrics)
-        dict_save = {'model': MODEL_NAME, 'setting': SETTING_NUM}
-        dict_save.update(scores)
-        df_save = pd.DataFrame(dict_save)
-        df_save.to_csv(f"{RES_DIR}/{MODEL_NAME}_val_metrics_setting_{i}.csv", sep="\t", encoding="utf-8")
-       
+########################
+## BLEU
+########################
+def tokenize(text):
+    tokens = re.split(r'\s|\.', text)
+    tokens = [t for t in tokens if len(t) > 0]
+    return tokens
 
-def string2json(text):
-    # convert json-like string to "answer" and "solution"
-    dict_json = ast.literal_eval(re.sub("```|\n|json", "", text))
-    return dict_json["answer"], dict_json["solution"]
 
+def bleu_score(reference, hypothesis, gram):
+    
+    reference_tokens = tokenize(reference)
+    hypothesis_tokens = tokenize(hypothesis)
+
+    if gram == 1:
+        bleu = sentence_bleu([reference_tokens], hypothesis_tokens, (1., ))  # BELU-1
+    elif gram == 2:
+        bleu = sentence_bleu([reference_tokens], hypothesis_tokens, (1. / 2., 1. / 2.))  # BELU-2
+    elif gram == 3:
+        bleu = sentence_bleu([reference_tokens], hypothesis_tokens, (1. / 3., 1. / 3., 1. / 3.))  # BELU-3
+    elif gram == 4:
+        bleu = sentence_bleu([reference_tokens], hypothesis_tokens, (1. / 4., 1. / 4., 1. / 4., 1. / 4.))  # BELU-4
+
+    return bleu
+
+
+def caculate_bleu(results, df, gram):
+    bleus = []
+    for qid, output in enumerate(results):
+        # prediction = extract_explanation(output)
+        prediction = output
+        target = df["lecture"][qid] + " " + df["solution"][qid]
+        target = target.strip()
+        if target == "":
+            continue
+        bleu = bleu_score(target, prediction, gram)
+        bleus.append(bleu)
+    avg_bleu = sum(bleus) / len(bleus)
+
+    return avg_bleu
+
+def score_rouge(str1, str2):
+    rouge = Rouge(metrics=["rouge-l"])
+    try:
+        scores = rouge.get_scores(str1, str2, avg=True)
+        rouge_l = scores['rouge-l']['f']
+        return rouge_l
+    except:
+        return 0
+
+
+def caculate_rouge(results, df):
+    rouges = []
+    for qid, output in enumerate(results):
+        prediction = extract_explanation(output)
+        target = df["lecture"][qid] + " " + df["solution"][qid]
+        target = target.strip()
+        if prediction == "":
+            continue
+        if target == "":
+            continue
+        rouge = score_rouge(target, prediction)
+        rouges.append(rouge)
+
+    avg_rouge = sum(rouges) / len(rouges)
+    return avg_rouge
+
+def caculate_meteor(results, df):
+    meteors = []
+    for qid, output in enumerate(results):
+        # prediction = extract_explanation(output)
+        prediction = output
+        target = df["lecture"][qid] + " " + df["solution"][qid]
+        target = target.strip()
+        if prediction == "":
+            continue
+        if target == "":
+            continue
+        meteor_score = meteor.compute(references=[target], predictions=[prediction])['meteor']
+        meteors.append(meteor_score)
+    avg_meteor = sum(meteors) / len(meteors)
+    return avg_meteor
+
+
+########################
+## Sentence Similarity
+########################
+def similariry_score(str1, str2, model):
+    # compute embedding for both lists
+    embedding_1 = model.encode(str1, convert_to_tensor=True)
+    embedding_2 = model.encode(str2, convert_to_tensor=True)
+    score = util.pytorch_cos_sim(embedding_1, embedding_2).item()
+    return score
+
+
+def caculate_similariry(results, data, model):
+    scores = []
+    for qid, output in enumerate(results):
+        prediction = extract_explanation(output)
+        target = data["lecture"][qid] + " " + data["solution"][qid]
+        target = target.strip()
+        score = similariry_score(target, prediction, model)
+        scores.append(score)
+
+    avg_score = sum(scores) / len(scores)
+    return avg_score
 
 def calculate_metrics_solutions(results, data):
     ## BLEU
@@ -42,10 +129,15 @@ def calculate_metrics_solutions(results, data):
     rouge = caculate_rouge(results, data)
     print("ROUGE-L: %.3f" % rouge)
 
+    meteor = caculate_meteor(results, data)
+    print("METEOR: %.3f" % meteor)
+
     ## Similarity
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2').cuda()
+    # model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2').cuda()
     model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     similarity = caculate_similariry(results, data, model)
-    print("Similariry: %.3f" % similarity)
+    print("Similarity: %.3f" % similarity)
 
-    return {"BLEU-1": [bleu1], "BLEU-4": [bleu4], "ROUGE": [rouge], "similarity": similarity}
+    return {"BLEU-1": [bleu1], "BLEU-4": [bleu4], "ROUGE": [rouge], "METEOR": [meteor], "similarity": similarity}
+
+
