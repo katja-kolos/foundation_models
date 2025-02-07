@@ -27,6 +27,16 @@ We further attempt:
 - learning from a teacher model's outputs (knowledge distillation scenario).
 
 ### 💡 Research Questions & Analysis 💡
-1. How well do front-tier LLMs perform on Scientific QA & Scientific Reasoning?
-2. How would learning an adapter for correct solution generation affect generations of smaller multimodal LLMs for this task?
-3. How does learning from golden data compare to learning from teacher model's outputs?
+**1. How well do front-tier LLMs perform on Scientific QA & Scientific Reasoning?**
+  - They can achieve high accuracy in answers to scientific questions from multimodal inputs _(avg. accuracy 80.5125 across 4 experimental settings and 6 models)_;
+  - Big LLMs can benefit from more context for better reasoning _(settings with more context have consistently better scores both in accuracy and semantic similarity than task-only setting)_;
+  - Extracting information (from solutions) is easier than producing new ideas (from lectures), as shown by accuracies and textual similarity scores.
+
+**2. How would learning an adapter for correct solution generation affect generations of smaller multimodal LLMs for this task?**
+  - Learning an adapter affects the GenLM's probability to generate explanations that deviate from golden ones
+  - In an experimental setting which required the model to produce the exact golden explanation from the training dataset, the adapters silenced model's generations, resulting in empty strings or answers with unknown rarely seen tokens.
+  - We suspect this is due to an overly strict error function, which supposedly creates an adapter-brake that discourages the model from making any error 
+
+**3. How does learning from golden data compare to learning from teacher model's outputs?**
+  - Learning from humanly prepared data (original dataset) consistently outperforms learning from the generations of the teacher model on the train partition, as shown by textual similarity metrics of the explanations.
+  - The error function on validation in KD-setting is close to the error function on validation in golden-setting; the error on train in KD-setting is consistently higher then in golden setting. 
