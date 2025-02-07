@@ -1,2 +1,0 @@
-model	setting	accuracy	BLEU-1	BLEU-4	ROUGE	METEOR	similarity	overall_metric
-google_paligemma-3b-ft-science-qa-224	2	0	0.0	0.0	0	0	-0.00941194096672527	-0.001882388193345054
