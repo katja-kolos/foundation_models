@@ -1,61 +1,0 @@
-2025-01-05 08:57:00,051 - INFO - Set constants: NUM_EPOCHS_FT=100, BATCH_SIZE=4
-2025-01-05 08:57:00,121 - INFO - Tesla V100-SXM2-32GB
-2025-01-05 08:57:00,121 - INFO - Memory Usage:
-2025-01-05 08:57:00,122 - INFO - Allocated: 0.0 GB
-2025-01-05 08:57:00,122 - INFO - Cached: 0.0 GB
-2025-01-05 08:57:19,289 - INFO - Loaded train dataset with 12726 rows
-2025-01-05 08:57:32,250 - INFO - Loaded validation with 4241 rows
-2025-01-05 08:57:32,252 - INFO - DataLoader for train ready
-2025-01-05 08:57:32,252 - INFO - DataLoader for validation ready
-2025-01-05 08:57:32,460 - INFO - Model: Qwen/Qwen2-VL-2B-Instruct
-`Qwen2VLRotaryEmbedding` can now be fully parameterized by passing the model config through the `config` argument. All other arguments will be removed in v4.46
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  3.70it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  4.99it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  4.74it/s]
-2025-01-05 08:57:33,298 - INFO - Loaded model
-2025-01-05 08:57:33,826 - INFO - Loaded tokenizer
-2025-01-05 08:57:35,390 - INFO - Loaded processor
-2025-01-05 08:57:45,068 - INFO - Ready: PrefixTuningModel
-2025-01-05 08:57:45,070 - INFO - Ready: optimizer
-2025-01-05 08:57:45,070 - INFO - Starting training
-2025-01-05 08:57:45,072 - INFO - Set model into train mode
-  0%|          | 0/100 [00:00<?, ?it/s]  0%|          | 0/100 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/perform_tuning_experiment.py", line 164, in <module>
-    train_errors_ft_qwen, val_errors_ft_qwen = train(model_prefix, tokenizer, processor, optimizer, dataloader_label_train, dataloader_label_val, preprocess_input_qwen)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/perform_tuning_experiment.py", line 99, in train
-    outputs = model(inputs, labels=labels)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/prefix_tuning.py", line 61, in forward
-    return self.model(inputs_embeds=inputs_embeds, attention_mask=attention_mask, pixel_values=inputs["pixel_values"], labels=labels)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/transformers/models/qwen2_vl/modeling_qwen2_vl.py", line 1751, in forward
-    loss = loss_fct(shift_logits, shift_labels)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/modules/loss.py", line 1293, in forward
-    return F.cross_entropy(
-  File "/pfs/data5/home/st/st_us-053000/st_st186032/fmenv/lib/python3.9/site-packages/torch/nn/functional.py", line 3479, in cross_entropy
-    return torch._C._nn.cross_entropy_loss(
-RuntimeError: "nll_loss_forward_reduce_cuda_kernel_2d_index" not implemented for 'BFloat16'
-
-============================= JOB FEEDBACK =============================
-
-NodeName=uc2n512
-Job ID: 25096069
-Cluster: uc2
-User/Group: st_st186032/st_us-053000
-State: FAILED (exit code 1)
-Nodes: 1
-Cores per node: 10
-CPU Utilized: 00:00:39
-CPU Efficiency: 4.43% of 00:14:40 core-walltime
-Job Wall-clock time: 00:01:28
-Memory Utilized: 9.21 GB
-Memory Efficiency: 10.03% of 91.80 GB

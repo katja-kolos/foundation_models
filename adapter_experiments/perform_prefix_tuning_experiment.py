@@ -11,7 +11,6 @@ from PIL import Image
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from transformers import AutoModelForImageTextToText, AutoTokenizer, AutoProcessor, Qwen2VLForConditionalGeneration
 
 from qwen_vl_utils import process_vision_info #this is some basic if-else image processing, can be reused as is for paligemma runs
 from prefix_tuning import PrefixTuningModelPastKeyValues, PrefixDataset, prefix_collate
@@ -46,8 +45,9 @@ logging.basicConfig(
 
 # CONSTANTS
 NUM_EPOCHS_FT = 20
-BATCH_SIZE = 4
-logging.info(f'Set constants: NUM_EPOCHS_FT={NUM_EPOCHS_FT}, BATCH_SIZE={BATCH_SIZE}')
+#BATCH_SIZE = 4
+#logging.info(f'Set constants: NUM_EPOCHS_FT={NUM_EPOCHS_FT}, BATCH_SIZE={BATCH_SIZE}')
+logging.info(f'Set constants: NUM_EPOCHS_FT={NUM_EPOCHS_FT}')
 
 device = 'cuda' # torch.cuda.get_device_name(0)
 logging.info(torch.cuda.get_device_name(0))
@@ -65,10 +65,22 @@ def preprocess_input_qwen(tokenizer, processor, prompts, texts, images, y, devic
         text=messages,
         images=image_inputs,
         videos=video_inputs,
-        padding=True,
+        padding="longest",
         return_tensors="pt",
     )
     max_length = inputs["input_ids"].size(1) 
+    labels = tokenizer(y, padding="max_length", truncation=True, max_length=max_length, return_tensors="pt")["input_ids"]
+    return inputs.to(device, dtype=torch.bfloat16), labels.to(device)
+
+def preprocess_input_paligemma(tokenizer, processor, prompts, texts, images, y, device):
+    images = [image.resize((224, 224)) for image in images]
+    inputs = processor(
+        text=prompts,
+        images=images,
+        return_tensors="pt",
+        padding="longest"
+    )
+    max_length = inputs["input_ids"].size(1)
     labels = tokenizer(y, padding="max_length", truncation=True, max_length=max_length, return_tensors="pt")["input_ids"]
     return inputs.to(device, dtype=torch.bfloat16), labels.to(device)
 
@@ -108,7 +120,8 @@ def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_v
         error /= num_samples
         logging.info(f'Error after epoch {epoch}: {error}')
         train_errors.append((epoch, error))
-        if epoch % 5:
+        #if epoch % 5:
+        if True:
             val_error = 0
             num_samples = 0
             for prompts, texts, images, y in dataloader_val:
@@ -128,7 +141,7 @@ def train(model, tokenizer, processor, optimizer, dataloader_train, dataloader_v
             val_errors.append((epoch, val_error))
     return train_errors, val_error
 
-def prepare_dataloaders(exp_setting: str):
+def prepare_dataloaders(exp_setting: str, batch_size: int):
     ### val data -- same for all settings for fair comparison
     df_val = pd.DataFrame(load_dataset('derek-thomas/ScienceQA', split='validation'))
     # filter validation data; #TODO: would it be wiser to validate on exactly the same subset used for benchmarking? or to have as much data as possible?
@@ -140,42 +153,43 @@ def prepare_dataloaders(exp_setting: str):
 
     # DataLoader for val data
     dataset_val = PrefixDataset(df_val)
-    dataloader_val=DataLoader(dataset_val, collate_fn=prefix_collate, batch_size=BATCH_SIZE, shuffle=True)
+    dataloader_val=DataLoader(dataset_val, collate_fn=prefix_collate, batch_size=batch_size, shuffle=True)
     logging.info('DataLoader for validation ready')
 
+    # Load golden data: needed no matter the setting to bring images 
+    # data with label and image data
+    df_train_label = pd.DataFrame(load_dataset('derek-thomas/ScienceQA', split='train'))
+    logging.info(f'Loaded train dataset with {len(df_train_label)} rows')
+    df_train_label = df_train_label[df_train_label['solution'] != ''].reset_index()
+    df_train_label['image'] = df_train_label.apply(lambda row: row['image'] if row['image'] else Image.new("RGB", (224, 224), (0, 0, 0)), axis=1)
+    
     if exp_setting == 'golden':
-        ### train data
-        # data with label and image data
-        df_train_label = pd.DataFrame(load_dataset('derek-thomas/ScienceQA', split='train'))
-        logging.info(f'Loaded train dataset with {len(df_train_label)} rows')
-
-        df_train_label = df_train_label[df_train_label['solution'] != ''].reset_index()
-        df_train_label['image'] = df_train_label.apply(lambda row: row['image'] if row['image'] else Image.new("RGB", (224, 224), (0, 0, 0)), axis=1)
+        # data from dataset
         df_train_label['input'] = df_train_label.apply(lambda row: build_prompt(row), axis=1)
         df_train_label['message'] = df_train_label.apply(lambda row: build_message(row), axis=1)
     
         # DataLoader for train data
         dataset_label_train = PrefixDataset(df_train_label)
-        dataloader_label_train=DataLoader(dataset_label_train, collate_fn=prefix_collate, batch_size=BATCH_SIZE, shuffle=True)
+        dataloader_label_train=DataLoader(dataset_label_train, collate_fn=prefix_collate, batch_size=batch_size, shuffle=True)
         logging.info('DataLoader for train ready')
         return dataloader_label_train, dataloader_val
     elif exp_setting == 'teacher':
         # data from Gemini for KD
         df_train_gemini = pd.read_csv('gemini_1_5_flash_output_train.csv', sep="\t")[['index', 'input', 'answer', 'explanation']]
-        logging.info(f'Loaded train dataset with {len(df_train_label)} rows')
+        logging.info(f'Loaded train dataset with {len(df_train_gemini)} rows')
 
         df_train_gemini = pd.merge(df_train_gemini, df_train_label[['index', 'image', 'solution']], on='index')
         df_train_gemini['message'] = df_train_gemini.apply(lambda row: build_message(row), axis=1)
         
         # DataLoader for train data
         dataset_gemini_train = PrefixDataset(df_train_gemini)
-        dataloader_gemini_train=DataLoader(dataset_gemini_train, collate_fn=prefix_collate, batch_size=BATCH_SIZE, shuffle=True)
+        dataloader_gemini_train=DataLoader(dataset_gemini_train, collate_fn=prefix_collate, batch_size=batch_size, shuffle=True)
         return dataloader_gemini_train, dataloader_val
 
-def save_assets(model, model_name, train_errors_ft_qwen, val_errors_ft_qwen):
+def save_assets(model, model_name, train_errors_ft_qwen, val_errors_ft_qwen, batch_size):
     # Save assets
     logging.info('Saving assets')
-    saving_path = f"{model_name.replace('/', '_').lower()}_pref_{NUM_EPOCHS_FT}_{BATCH_SIZE}"
+    saving_path = f"{model_name.replace('/', '_').lower()}_pref_{NUM_EPOCHS_FT}_{batch_size}"
     torch.save(model.state_dict(), saving_path)
     logging.info(f'Saved model to path: {saving_path}')
     with open(f'{saving_path}_train_error', 'w') as f:
@@ -199,25 +213,67 @@ def main():
         default=1,
         help="n gpus to use at training. Default: 1",
     )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=4,
+        help="batch_size for both train and validation dataloaders"
+    )
+
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="Qwen/Qwen2-VL-2B-Instruct",
+        help="exact hf path to model; default: 'Qwen/Qwen2-VL-2B-Instruct'"
+    )
 
     args = parser.parse_args()
-
-    model_name = "Qwen/Qwen2-VL-2B-Instruct"
+    
+    model_name = args.model_name
     logging.info(f'Model: {model_name}')
 
-    model = AutoModelForImageTextToText.from_pretrained(
-        model_name,
-        torch_dtype=torch.bfloat16 #"auto"
-    )
-    logging.info('Loaded model')
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    logging.info('Loaded tokenizer')
-    processor = AutoProcessor.from_pretrained(model_name)
-    logging.info('Loaded processor')
+    if model_name == "Qwen/Qwen2-VL-2B-Instruct":
+        from transformers import AutoModelForImageTextToText, AutoTokenizer, AutoProcessor, Qwen2VLForConditionalGeneration
+        model = AutoModelForImageTextToText.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16, #"auto"
+            device_map="auto",
+        )
+        logging.info('Loaded model')
+    
+        processor = AutoProcessor.from_pretrained(model_name)
+        logging.info('Loaded processor')
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        logging.info('Loaded tokenizer')
+        
+        preprocess_input_function = preprocess_input_qwen
+        match_n_layer = model.config.num_hidden_layers
+        match_n_head = model.config.num_key_value_heads
+        n_embd = model.config.hidden_size // 6
 
-    match_n_layer = model.config.num_hidden_layers
-    match_n_head = model.config.num_key_value_heads
-    n_embd = model.config.hidden_size // 6
+    elif model_name == "google/paligemma2-3b-pt-224":
+        from transformers import PaliGemmaProcessor, PaliGemmaForConditionalGeneration
+        from helpers import login_to_hf
+        login_to_hf()
+        logging.info("Login with token: done")
+        model = PaliGemmaForConditionalGeneration.from_pretrained(
+                model_name, 
+                torch_dtype=torch.bfloat16, 
+                device_map="auto", 
+        )
+        logging.info('Loaded model')
+        
+        processor = PaliGemmaProcessor.from_pretrained(model_name)
+        logging.info('Loaded processor')
+        tokenizer = processor.tokenizer #AutoTokenizer.from_pretrained(model_name)
+        logging.info('Loaded tokenizer')
+        
+        preprocess_input_function = preprocess_input_paligemma
+
+        match_n_layer = model.config.num_hidden_layers
+        match_n_head = model.config.text_config.num_key_value_heads
+        n_embd = model.config.hidden_size // 2
+
     model_prefix = PrefixTuningModelPastKeyValues(model, match_n_layer, match_n_head, n_embd, device).to(device)
     optimizer = torch.optim.AdamW(model_prefix.prefix_tuning.parameters(), lr=5e-5)
     
@@ -225,12 +281,12 @@ def main():
         # Wrapper for multi-GPU processing
         model_prefix = torch.nn.DataParallel(model_prefix)
     
-    dataloader_train, dataloader_val = prepare_dataloaders(exp_setting=args.exp_setting)
+    dataloader_train, dataloader_val = prepare_dataloaders(exp_setting=args.exp_setting, batch_size=args.batch_size)
 
     logging.info('Starting training')
-    train_errors, val_errors = train(model_prefix, tokenizer, processor, optimizer, dataloader_train, dataloader_val, preprocess_input_qwen)
+    train_errors, val_errors = train(model_prefix, tokenizer, processor, optimizer, dataloader_train, dataloader_val, preprocess_input_function)
     
-    save_assets(model, model_name, train_errors, val_errors)
+    save_assets(model, model_name, train_errors, val_errors, args.batch_size)
     logging.info('Done')
 
 if __name__ == "__main__":
