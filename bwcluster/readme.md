@@ -12,8 +12,8 @@ Note: in the end, only prefix-tuning experiments were performed on BW GPU Cluste
 The scripts, which are now grouped into folders, were initially in a flat structure in one home folder. 
 For each model type, the script slightly differs: pre-processing and post-processing is different; some models require login to Hugginface. 
 
-1. A script for model inference / adapter training is a `.py` script which additionally accepts arguments for configuration (e.g. number of gpus to use, loading part of the model to cpu etc). 
-2. This script is called by an `.sh` script, which also specifies job parameters (asks for resources with a corresponding amount of gpus, asks for a specific type of gpu -- e.g. with `NVIDIA H100 PCIe` we did not face OOM issues which we did with `Tesla V100` for prefix tuning; for benchmarking, any GPU could be used). Those requirements are chosen by a human launching the job based on what resources are available on the cluster at the moment.
+1. A script for model inference / adapter training is a `.py` script which additionally accepts arguments for configuration (e.g. number of GPUs to use, loading part of the model to CPU etc). 
+2. This script is called by an `.sh` script, which also specifies job parameters (asks for resources with a corresponding amount of GPUs, asks for a specific type of GPU -- e.g. with `NVIDIA H100 PCIe` we did not face OOM issues which we did with `Tesla V100-SXM2-32GB` for prefix tuning; for benchmarking, any GPU could be used, because parts of the model could now be loaded to CPU, only resulting in slower processing). Those requirements are chosen by a human launching the job based on what resources are available on the cluster at the moment.
 3. The job is submitted by a `sbatch` command and executed when the requested resources are available.
 See more on SLURM at BWUniCluster [here](https://wiki.bwhpc.de/e/BwUniCluster2.0/Batch_Queues).
 
