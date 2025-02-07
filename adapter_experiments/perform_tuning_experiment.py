@@ -181,10 +181,10 @@ logging.info('Saving assets')
 saving_path = f"{model_name.replace('/', '_').lower()}_pref_{NUM_EPOCHS_FT}_{BATCH_SIZE}"
 torch.save(model.state_dict(), saving_path)
 logging.info(f'Saved model to path: {saving_path}')
-with open(f'saving_path_{train_error}', 'w') as f:
+with open(f'{saving_path}_train_error', 'w') as f:
     f.write(train_errors_ft_qwen)
     logging.info('Saved train_errors')
-with open(f'saving_path_{val_error}', 'w') as f:
+with open(f'{saving_path}_val_error', 'w') as f:
     f.write(val_errors_ft_qwen)
     logging.info('Saved validation_errors')
 
