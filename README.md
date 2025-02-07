@@ -1,24 +1,32 @@
 # foundation_models
 
-This repo is a course project in Foundation Models. Our domain is scientific question answering, based on [Science QA](https://scienceqa.github.io/) dataset. 
+This repository is a course project on Foundation Models. Our domain is scientific question answering, based on [Science QA](https://scienceqa.github.io/) dataset. 
 
-### 💡 Hypotheses 💡
-1. **agentic approach simulation**: a very **small LM** might be able to perform this task in a tool calling scenario: SML can 'decide' to invoke (a) 🌄 tool for image captioning (b) 📚 tool for information retrieval (both tools simulated by the dataset's provided image caption data and lecture data). We construct a framework with SML that is way less computationally expensive than inferencing an LLM, and compare the performance to existing good multimodal models.
-  tl;dr: SML + lecture vs BigLLM; zero-shot on validation. 
-2. **better performance 📈 **: we can improve performance of existing good multimodal models through soft-prompting.
-3. **knowledge distillation from reasoning paths experiment 🧪**:
-   
-  * 3.1. learning from answer and solution of good model as opposed to learning from raw data lowers performance significantly (!test!)
-  * 3.2. learning from answer and solution of good model AND answer and solution from training data also lowers performance significantly because of conflicts (!test!)
-  * 3.3. learning from good CoT of good model may lead to better performance than learning from the outputs (answer and solution) of the same good model (!test!)
-  * 3.4. learning from answer and solution of good model and retrieved augmented context (in our simulation: lecture) can boost performance (!test!)
-  * 3.5. learning from mistakes of big model (answer and solution of train + answer and solution of big model + retrieved augmented context) can boost performance even further (!test!)
-  * 3.6. fine-tuning on reasoning paths of domain task (with or without "retrieved" context (=lecture) may be more efficient than fine-tuning on whole domain texts (compare performance of our best method to zero-shot inference of science model NOT tuned on this dataset, also compare with leaderboard. Also report differences in training and inference costs).
+### 📄 Data 📄
+The dataset contains middle to high school level tasks in natural sciences and social sciences. Task **input** is always a short question and 2-5 answer choices, optionally with _lecture_ material, _hint_, and a relevant _image_ (the image can be part of the question or an additional illustration). The **output** should be the correct _answer_ + a plausible _explanation_ of the answer choice. 
 
+We work with four experimental settings for **input**: 
 
-### 👣 Steps 👣
-1. Benchmarking existing good multimodal models (and small text-only models as weak baseline) - done.
-We have a champion: Gemini is the best for the role of big teacher LLM. Its outputs will be used as training CoT reasoning paths.
-2. Define the student model!
-3. How are we going to train the student? Write script for LoRA/soft prompting.
-4. Experiment with small LLM + agent
+- Question - Task - Choices - Hint (QTCH)
+- Question - Task - Choices - Hint - Lecture (QTCHL)
+- Question - Task - Choices - Hint - Lecture - Solution (QTCHLS)
+- Question - Task - Choices - Hint - Solution (QTCHS)
+
+Image is always attached to the input if it is available; otherwise a dummy placeholder blank image is created. 
+
+### 🚀 Approach 🚀
+We benchmark several large multimodal LLMs to assess: 
+- their capabilities of answering scientific questions from existing knowledge and common sense;
+- their ability to retrieve information from context (i.e. choose the correct answer if the solution is given);
+- their reasoning abilities (i.e. coming to a correct conclusion provided lecture material).
+
+Our metrics are: accuracy for answer choice; average of several normalised textual similarity metrics: BLEU-1, BLEU-4, ROUGE-L, METEOR, cosine similarity (BERT embeddings). 
+
+We further attempt:
+- adapter tuning to adapt existing small language models to the dataset, as well as
+- learning from a teacher model's outputs (knowledge distillation scenario).
+
+### 💡 Research Questions & Analysis 💡
+1. How well do front-tier LLMs perform on Scientific QA & Scientific Reasoning?
+2. How would learning an adapter for correct solution generation affect generations of smaller multimodal LLMs for this task?
+3. How does learning from golden data compare to learning from teacher model's outputs?
