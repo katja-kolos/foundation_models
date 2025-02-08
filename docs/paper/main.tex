@@ -1,5 +1,7 @@
 %%%%%%%% ICML 2021 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
 
+%6 pages + references
+
 \documentclass{article}
 
 % Recommended, but optional, packages for figures and better typesetting:
@@ -49,21 +51,23 @@
 \icmlsetsymbol{equal}{*}
 
 \begin{icmlauthorlist}
-\icmlauthor{Florian Dreyer (3667877)}{equal,cs}
-\icmlauthor{Ekaterina Kolos (3688474)}{equal,ims}
-\icmlauthor{Daria Matiash (3668740)}{equal,ims}
+\icmlauthor{Florian Dreyer (3667877)}{equal,us}
+\icmlauthor{Ekaterina Kolos (3688474)}{equal,us}
+\icmlauthor{Daria Matiash (3668740)}{equal,us}
 \end{icmlauthorlist}
 
-\icmlaffiliation{cs}{Institut fuer KI}
-\icmlaffiliation{ims}{Institut fuer Maschinelle Sprachverarbeitung}
+\icmlaffiliation{us}{University of Stuttgart}
+%\icmlaffiliation{ims}{Institut fuer Maschinelle Sprachverarbeitung}
 
-\icmlcorrespondingauthor{Florian Dreyer}{c.vvvvv@googol.com}
+\icmlcorrespondingauthor{Florian Dreyer}{st182762@stud.uni-stuttgart.de}
+\icmlcorrespondingauthor{Ekaterina Kolos}{st186032@stud.uni-stuttgart.de}
+\icmlcorrespondingauthor{Daria Matiash}{st185745@stud.uni-stuttgart.de}
 %\icmlcorrespondingauthor{Eee Pppp}{ep@eden.co.uk}
 
 % You may provide any keywords that you
 % find helpful for describing your paper; these are used to populate
 % the "keywords" metadata in the PDF but will not be shown in the document
-\icmlkeywords{Scientific Reasoning, VQA}
+\icmlkeywords{Scientific Reasoning, Prefix Tuning, Knowledge Distillation}
 
 \vskip 0.3in
 ]
@@ -79,7 +83,8 @@
 \printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-This project assesses the capabilities of pre-trained multimodal LLMs to perform scientific reasoning tasks on multimodal data. We further explore how prompt tuning (soft prompting) and prompt engineering techniques can improve performance. We then attempt to distill knowledge to a small LLM.
+%Note: we are doing scientific QA and not really scientific reasoning in the end. How do we frame it? -> Added QA to multimodal data, what do you think? -- Good, thanks!
+This project assesses the capabilities of pre-trained multimodal LLMs to perform scientific reasoning tasks on multimodal Question Answering (QA) data. We further explore how Prefix Tuning and Low-Rank Adaptation (LoRA) can improve performance of smaller LLMs. We then attempt to distill knowledge to a smaller LLM using Prefix Tuning and LoRA.
 \end{abstract}
            
 
@@ -87,299 +92,373 @@ This project assesses the capabilities of pre-trained multimodal LLMs to perform
 \section{Introduction}
 \label{introduction}
 
-\textbf{SECTION NEEDS UPDATE}
-Scientific machine reasoning is the application of AI techniques to simulate scientific reasoning processes, such as  data interpretation, hypothesis generation, and causal inference. It facilitates scientific inquiry and discovery by enabling machines to independently analyze scientific data, generate hypotheses, and make predictions.
-For our project, we intend to compare different approaches around generative large language models to generate solutions for school science problems. On an existing benchmark with human solutions, we are planning to compare: a pure LLM with zero-shot and few-shot prompting (and possibly some more fine-grained prompting techniques), an agentic approach with ability to query external resources like textbooks in physics, maths etc, and soft-prompting techniques. We then plan to attempt knowledge distillation to a smaller LLM. 
+Scientific machine reasoning is the application of AI techniques to simulate scientific reasoning processes, such as data interpretation, hypothesis generation, and causal inference. 
+%It facilitates scientific inquiry and discovery by enabling machines to independently analyze scientific data, generate hypotheses, and make predictions.
 
-\section{Motivation}
-Recent developments in foundation models have shown remarkable performance on challenges that call for contextual awareness and scientific reasoning. However, these models are often resource-intensive, which limitates their scalability and accessibility for broader applications. Through the transfer of reasoning capacities from large models to smaller, more efficient ones, this study focuses on the possibility of knowledge distillation to address these issues. By applying this approach to the Science QA datase, we want to close the gap between performance and usefulness by enabling lightweight models to handle challenging reasoning tasks with high accuracy and robustness.
-\label{motivation}
-\textbf{TODO}
+Recent developments in foundation models, such as o1/o3 from OpenAI \cite{OpenAI2024o1} or R1 from DeepSeek \cite{deepseek-r1}, have shown remarkable performance in challenges that require contextual awareness and reasoning.
+However, these models are often resource consuming, which limits their scalability and accessibility for broader applications.
+
+This leads us to our research questions:
+
+\paragraph{RQ1}
+\label{def:rq1}
+How can large multimodal LLMs deal with multimodal scientific reasoning?
+%We in fact answer three questions: 
+% 1) how well they perform in scientific question answering (QTCH), 
+% 2) whether they are capable of reasoning (QTCHL) 
+% 3) how well they use in-context information (=solution) to produce expected useful generation
+
+\paragraph{RQ2}
+\label{def:rq2}
+How do Prefix Tuning and LoRA affect the reasoning capabilities of smaller pre-trained models?
+% This is only scientific QA, without reasoning!
+
+\paragraph{RQ3}
+\label{def:rq3}
+How good is knowledge distillation with adapter methods compared to training on manually annotated data?
+
+We first want to evaluate how six large front-tier LLMs perform on the \textsc{ScienceQA} dataset \cite{lu2022learn} using several metrics. Following that we evaluate how well Prefix Tuning \cite{li2021prefix} and LoRA \cite{hu2021lora} perform for fine-tuning two smaller LLMs on this dataset. Last, we perform knowledge distillation using Prefix Tuning and LoRA and compare how the distilled models compare to the previously fine-tuned models.
 
 \section{Background and Related Work}
 \label{related-work}
 
-% Large Language Models
+\paragraph{Prefix Tuning}
+Prefix Tuning, as introduced in \cite{li2021prefix}, is a parameter-efficient fine-tuning method that freezes the pre-trained model's parameters and trains a small, learnable "prefix" as illustrated in figure \ref{fig:prefix_tuning} that guides the model during task-specific inference. This allows the model to adapt to new tasks while preserving its general pre-trained knowledge.
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=1\linewidth]{image.png}
+    \caption{Intuition behind Prefix Tuning. Source: \cite{li2021prefix}}
+    \label{fig:prefix_tuning}
+\end{figure}
+By significantly reducing the number of trainable parameters, Prefix Tuning is especially advantageous in resource-constrained scenarios or when deploying models for multiple tasks. Studies have shown that it achieves performance comparable to full fine-tuning in many applications, such as natural language generation and classification.
+%TODO: references
 
-\paragraph{Prompting techniques} A prompt is a command a user gives to a generative LLM used to guide its output for a downstream task, which contains several of the following: a role (persona) the LLM has to follow (e.g. "You are a helpful assistant"), a precise task description, examples (exemplars) for analogous learning (few-shot prompting), requirements on the process of reasoning, style instructions, output format requirements, additional information for in-context learning, emotion prompting components (highlighting why the task or a particular requirement is important). Prompts can be combined into sequences or graphs (with complex branching and parallelism). Of particular interest are small requirements on the reasoning process that can significantly improve performance when added to the prompt, such as 
-%"Rephrase and expand the question, and respond" \cite{}, or 
-"Let’s think step by step" \cite{kojima2022large}. 
-Chain-of-thought prompts improve reasoning capabilities by asking the model to speak its process of thinking out loud, with variations including self-ask, step-back prompting, thread-of-thought, least-to-most prompting (decomposing then solving), plan-and-solve prompting, tree-of-thought, recursion-of-thought and many more \cite{schulhoff2024prompt}. 
-%with the resulting systems possibly using multiple CoT reasoning trajectories to select the most likely one (e.g. Uncertainty-Routed CoT Prompting, or making an LLM generate various prompting instructions that are then tested by another LLM on 24 NLP tasks to chose the best one \cite{zhou2022large}). %katja: I omit this to save space as not directly relevant
-%Furthermore, prompts themselves can be compressed and automatically optimized to improve efficiency and reduce costs \cite{chang2024efficient}. \cite{ge2023context} compress a long context 4x into memory slots, while \cite{weston2023system} ask the LLM to first summarize the prompt and then execute it. Self-criticism and ensembling techniques can further be used to improve reasoning capabilities \cite{schulhoff2024prompt}. 
-Soft prompting is an alternative to fine-tuning where the model is frozen while only a small number of "soft" prompt parameters are trained \cite{lester2021prompt}. These parameters are used to guide the model in the right direction.
+\paragraph{LoRA}
+Low-Rank Adaptation (LoRA) \cite{hu2021lora} is a parameter-efficient fine-tuning technique designed to adapt pre-trained models to downstream tasks with minimal computational overhead. LoRA introduces trainable low-rank matrices into the model's attention layers while keeping the original weights frozen. These matrices encode task-specific knowledge, allowing the model to be fine-tuned with a significantly smaller number of parameters compared to traditional fine-tuning.
 
-\paragraph{Agents} An important step forward in using LLMs are agent-based architectures \cite{lin2024swiftsage} \cite{ghafarollahi2024sciagents}. They allow the LLM to act as an intelligent being capable of planning a solution of a complex task, while resorting to external resources on the way to acquire in-context the knowledge it does not have from pre-training. The retrieved information, results of invoking tools, such as calculators, and of interactions with the environment are appended to the prompt (or, in a more advanced scenario, to the summarized memory \cite{ge2023context}). Optionally, a reflexion step (explicit reasoning on all the accumulated information) is added before allowing further generation of the final response. 
+LoRA is particularly effective in scenarios where memory efficiency is critical, as it avoids modifying or storing the full set of model weights. Studies have shown that LoRA achieves competitive performance on various NLP tasks, such as machine translation and text classification \cite{mao2025survey}.
+%TODO: references
 
-\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (mobile AI apps) and when access to large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy \cite{li2024turning} (c.f. contrastive CoT). Training small models on a CoT reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}, which is close to \textit{response-based KD} where the student model mimics the output of the teacher. Alternatively, with \textit{feature-based KD} the knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
+\paragraph{Knowledge distillation (KD)} allows to obtain smaller models capable of successfully following the behavior of larger teacher models. This is particularly useful for privacy reasons (mobile AI apps) and when access to large models in the cloud is not guaranteed (e.g. in cars). The teacher model can be used to intelligently select examples on which the student model is trained (dataset distillation) \cite{yu2023dataset}, or provide negative samples to show the student what incorrect answers or reasoning paths it should avoid to improve task accuracy \cite{li2024turning}.
+%(c.f. contrastive CoT). 
+Training small models on a chain-of-thought reasoning path of a larger model was also shown to be a way to obtain a small student model replicating reasoning capabilities of teacher on downstream tasks \cite{magister2022teaching}. 
+% which is close to \textit{response-based KD} where the student model mimics the output of the teacher. 
+In our project, we follow a similar approach and perform \textit{response-based knowledge distillation} \cite{gou2021knowledge}, learning to mimic the output of the teacher.
+%Alternatively, with \textit{feature-based KD} the knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
 
-In our project, we plan to develop an extended version of CoT knowledge distillation, where both the reasoning paths and the essence of the external knowledge the teacher agent has retrieved for the tasks are acting as training data for the student model. This way the teacher agent "defines" the "protocols" of solving complex tasks, while the student model tries to "follow" the learnt "instructions" and memorize important information for similar tasks. If we succeed, such small models could be a valuable asset in practice in enterprise environments, to encode important protocols and parts of project documentation, replacing expensive intelligent agents for specific tasks. 
-
-%\katja{Crazy idea: can we distill a reasoning path of a whole agent into a smaller model? I.e. instead of intelligent decision making that a large model performs for a complex task (search for X first, then look up Y, then formulate hypotheses Z) the student model learns the "protocols" of "customer support" and acts accordingly, without actually "understanding" why a particular action is good in a particular situation}
-
-\section{Methodology}
-We postulate the following research questions: 
-%RQ1: Can we build a LLM agent to improve the LLMs performance on science problems?
-%RQ2: Does Soft Prompting improve the performance of the LLM (agent)?
-%RQ3: Can an LLM agent's behavior be distilled into a single model?
-RQ1: Does Soft Prompting improve the performance of the LLM for scientific reasoning?
-RQ2: Can a teacher model's knowledge be distilled into a student model's soft prompt?
-
-%\paragraph{RQ1} 
-%We plan to start by prompting a multimodal model with reasoning capabilities with a zero-shot and few-shot prompting settings. Preliminary list of foundation models to be compared as baselines is: CLIP, GPT4o (GPT4-V), T5, BigGAN, Gemini; small models: TinyCLIP, T5-Small; Llama models. This simple generation will be compared with an agent-based approach using the same models, which will now include augmented retrieval of information on the scientific task from domain-specific texts. 
-
-%\paragraph{RQ2}
-%We plan to use Soft Prompting as one of the parameter-efficient fine-tuning techniques on the LLM used to guide it towards better reasoning. To achieve this we will add learnable prompt parameters to the base LLM we use. While training these parameters the rest of the model will be frozen \cite{lester2021prompt}.
-\paragraph{RQ1}
-Our soft prompting approach relies on prefix soft prompts as introduced in [TODO: cite Li 2021], that can be used both for encoder-decoder and for autoregressive architectures. The models we test here are autoregressive.
-
-%\paragraph{RQ3}
-%In order to distill the knowledge from the system obtained at previous steps, we plan to do the model distillation with Chain-of-Thought Prompting for Reasoning approach. Following techniques described in \cite{magister2022teaching} \cite{wei2022chain}, the student model will be fine-tuned using these CoT responses together with any additional information the agent has retrieved from external sources to produce intermediate reasoning steps. At the same time, the teacher model generates multiple CoT responses, and the student learns from the aggregate (self-consistent) reasoning paths. 
-%The foundation model to serve as student LLM should be small, multimodal, capable of reasoning and capable of acquiring new distilled knowledge. A preliminary list of candidate models: small Llama and LLaVA models, MiniGPT-4, small FLAVA models, distilUNITER, lxmert, distilled ViLT.
-%The described approach can help the student model avoid common mistakes and output more consistent answers.
+\paragraph{Models} We experiment with the following foundation models: 
+\texttt{Pixtral-12b-2409}, \texttt{LLaVA-1.5-7b-hf}, \texttt{Gemini 1.5 Flash}, \texttt{Gemini 1.5 Flash 8B}, \texttt{GPT 4}, \texttt{GPT 4o mini}, %and two small MLLMs: 
+\texttt{Qwen2-VL-2B-Instruct}, \texttt{paligemma-3b-pt-224}.
 
 \section{Dataset}
 \label{dataset}
-This study is based on the ScienceQA dataset \cite{lu2022learn}. The ScienceQA dataset is a benchmark for multimodal reasoning in science, consisting of over 21,000 questions across topics like natural science, social science and language science. Each question includes textual prompts, optionally visual aids (e.g., diagrams, charts), answer options, detailed explanations and lecture context. The dataset spans various difficulty levels, enabling evaluation of models on both basic and advanced scientific reasoning, reaching from elementary to high school level questions.
-ScienceQA supports tasks such as multimodal comprehension, answer explanation generation, and educational AI development. Its high-quality annotations and diverse content make it an ideal benchmark for assessing models in science education and reasoning. In our experiments, we leveraged the dataset to assess knowledge distillation under diverse scientific scenarios, focusing on the ability to distill the reasoning capabilities.
-Irregularities:
-For some datapoints, the image data is missing, while the answer can be deduced from text alone.
-Apart from the image field, missing values can occur in lecture and solution fields.
-As about 50\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it is available.
+This study is based on the \textsc{ScienceQA} dataset \cite{lu2022learn}. The \textsc{ScienceQA} dataset is a benchmark for multimodal reasoning in science, consisting of more than 21,000 questions across topics like Natural science or Social science. 
+Each question includes textual prompts, optionally visual aids (e.g., diagrams, charts), answer options, detailed explanations, and lecture context. The dataset spans various difficulty levels, enabling evaluation of models on both basic and advanced scientific reasoning, reaching from elementary to high school level questions.
+%%% This line is not really relevant to our purposes. Let us omit it because we are running out of space
+%\textsc{ScienceQA} supports tasks such as multimodal comprehension, answer explanation generation, and educational AI development. 
+%%% This line is subjective assessment of usefullness of the dataset 
+%Its high-quality annotations and diverse content make it an ideal benchmark for assessing models in science education and reasoning. 
+%%% This line goes into content of other sections and feels a bit out of place
+%In our experiments, we leveraged the dataset to assess knowledge distillation under diverse scientific scenarios, focusing on the ability to distill the reasoning capabilities.
+The dataset contains some notable irregularities. For some datapoints, the image data is missing (sometimes when it is required to solve the task, sometimes when the answer can be deduced from text alone).
+Apart from the image field, missing values can occur in lecture and solution fields (about 9\% and 15\% respectively). As about 50\% of the datapoints are missing an image, we decide to process both text-only and text+image datapoints similarly with multimodal models, attaching the image to the prompt if it was present in the data. When the image was not available, we generated a blank empty image as a placeholder. 
 
-\section{Metrics}
-We evaluate model's performance with question answering accuracy domain-wise in order to have a fair comparison with leaderboards. The reasoning steps can be evaluated with semantic similarity metrics (e.g. adopted from machine translation) such as BLEU, METEOR, ROUGE, and cosine similarity.
-\subsection{Multiple choice Evaluation}
-Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. It was determined that the computation of the overall score should assign the highest weight (\textbf{50\%}) to the ability to provide correct answers (accuracy score), as this represents the most critical aspect of performance evaluation.
-\subsection{Answer Reasoning Evaluation}
-Due to the pecularity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen. Our validation process is consisted of the metrics introduced in the original paper \cite{lu2022learn}  with a few additional metrics and techniques that we consider of high importance in regards to the scientific textual data.
-
-\paragraph{BLEU}
-BLEU-score (\cite{papineni2002bleu}) can measure how closely the model's generated explanation aligns with the human-authored explanation. BLEU-1 measures if the model uses the right scientific terms or key words (e.g., "photosynthesis," "temperature"). However, it ignores word order and logical progression, so it can’t evaluate reasoning or explanation quality. That is why BLEU-4 score is also computed in order to capture both vocabulary and the arrangement of words into meaningful phrases, evaluating fluency and coherence.
-Scientific explanations can often convey the same idea with different wording, making semantic similarity hard to capture.
-BLEU might penalize valid but rephrased or concise answers and it does not account for deeper meaning or logical correctness, which are crucial in reasoning tasks. Since this metric can give valuable insights on the generated outputs, we do not consider these scores as the most important and both BLEU-1 and BLEU-4 scores have \textbf{5\%} impact.
-
-\paragraph{ROUGE}
-ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}). It lead to the conclusion that this metric would not drastically affect the overall score and contribute (\textbf{5\%}).
-
-\label{example:1}
-\begin{itemize}
-    \item \textbf{Reference:} Plants absorb sunlight to produce energy.
-    \item \textbf{Candidate:} Sunlight is absorbed by plants to create energy.
-\end{itemize}
-
-\paragraph{METEOR}
-METEOR (\cite{banerjee2005meteor}) evaluates text similarity based on precision, recall, and alignment of semantically meaningful components like synonyms and stems, making it well-suited for capturing the nuanced language used in scientific reasoning.
-By incorporating a weighted F-score and penalties for excessive mismatches, METEOR provides a balanced evaluation of fluency and accuracy, crucial for assessing LLM-generated answers on the Science QA Dataset. Due to these balanced text evaluation, this metric has \textbf{15\%} impact on the overall score.
-% \subsubsection{Cosine similarity with SciBERT}
-% We extended the evaluation of cosine similarity using SciBERT (\cite{beltagy2019scibert}) embeddings. These vectors are more consistent with the domain-specific terminology and reasoning patterns present in the Science QA Dataset because it has been properly pre-trained on scientific literature.
-% SciBERT generates more accurate similarity embeddings because it better reflects the complex relationships between scientific concepts than general-purpose models like those in Sentence Transformers.
-% When assessing the logical and factual coherence of scientific reasoning, the structural and contextual semantics specific to scientific texts are reflected in the embeddings produced by SciBERT.
-% Assessments for jobs requiring sophisticated scientific understanding are more reliable when SciBERT is used for cosine similarity since it guarantees that the evaluation metric is domain-specific.
-
-\paragraph{Cosine similarity with Sentence Transformers}
-Sentence Transformer models are optimized for sentence-level embeddings, which capture the overall contextual similarity of answers more effectively, making them suitable for general-purpose evaluation tasks like scientific reasoning.
-Unlike SciBERT, which is tailored to scientific text and could have been used as sentence embedder, Sentence Transformers are pre-trained on diverse datasets, enabling them to generalize better to variations in phrasing and style present in the Science QA Dataset.
-Their ability to handle broader linguistic nuances ensures that the evaluation accounts for both semantic correctness and the logical flow of responses, which is essential when assessing reasoning across a wide range of scientific topics. That is the reason for using Sentence Transformer model for measurements of cosine similarity between the lecture material and annotated explanations and models' outputs with impact weight of \textbf{10\%}.
-
-\paragraph{Overall score}
-In order to obtain a numeric description of the model's performance, we set the follwoing metric that includes previously mentioned metrics with the given importance weights:
-\begin{equation*}
-\begin{split}
-\text{Overall Score} = & \, 0.6 \cdot \text{Accuracy} + 0.05 \cdot \text{BLEU-1} \\
-& + 0.5 \cdot \text{BLEU-4} + 0.05 \cdot \text{ROUGE} \\
-& + 0.15 \cdot \text{METEOR} \\
-& + 0.1 \cdot \text{Cosine Similarity}
-\end{split}
-\end{equation*}
-We prioritize the ability to generate correct answers as the most critical aspect, with reasoning ranked as the second-highest priority in our overall evaluation metric.
-
-
-
-
-\section{Experiments}
-\label{experiments}
-
-\subsection{Setup}
-We start by zero-shot benchmarking existing multimodal models in four simple prompt settings, partly repeating with the official evaluation suite:
+\section{Methodology}
+\label{section:methodology}
+% TODO: add references to models
+In the following we present the methodology we used to examine the three research questions (RQ).
+%(\ref{def:rq1}-\ref{def:rq3})).
+\paragraph{RQ1} We benchmark six front-tier LLMs using accuracy and the average of five text similarity metrics introduced in the metrics section \ref{section:metrics}. 
+%The six LLMs we use are Google Gemini 1.5 Flash and Flash 8B, OpenAI GPT 4 and 4o mini, LLaVA 1.5 7B and MistralAI Pixtral 12B 2409. 
+To investigate how additional information and the correct solution in the prompt influence the performance, we use four different prompt settings: 
 \begin{enumerate}
 	\item \textbf{question - choices - hint - image - task}
 	\item \textbf{question - choices - hint - image - task + lecture}
 	\item \textbf{question - choices - hint - image - task + lecture + solution}
 	\item \textbf{question - choices - hint - image - task + solution}
 \end{enumerate}
+Each model is benchmarked on all four settings using the \textsc{ScienceQA} validation data. We use the validation split instead of the test split since we later use the results to choose a champion teacher model. This decision can't be made using the test data since it's utilized to evaluate knowledge distillation performance.
 
-For the first two the model has to output \textbf{answer - solution}, for the third - \textbf{answer} (the easiest set up meant to ensure the model can deduce the correct answer from an already provided correct solution). 
+\paragraph{RQ2} For the comparison of Prefix Tuning and LoRA we fine-tune two smaller multimodal LLMs
+%both Qwen2 VL 2B Instruct and PaliGemma2 3B 
+using the two techniques separately. As the label to train on we choose the solution to enable the adapters to learn more of the reasoning. We then compare the performance of the four fine-tuned models to the zero-shot performance of the two base models on \textsc{ScienceQA} test data.
 
-We evaluate: 
-\begin{enumerate}
-	\item OpenAI models: \texttt{GPT-4}, \texttt{GPT-4o-mini}
-	\item MistralAI model: \texttt{Pixtral-12b-2409}
-    \item Google models: \texttt{Gemini-1.5-flash}, \texttt{Gemini-1.5-flash-8B}
-	\item Llava model:  \texttt{llava-hf/llava-1.5-7b-hf}
-\end{enumerate}
+\paragraph{RQ3} 
+%To investigate how Knowledge Distillation performs using these two adapter methods compared to fine-tuning the models using the adapters and the original dataset we use the fine-tuned models from RQ2 and further fine-tune the two models from scratch using the adapter methods and the output from our teacher model. 
 
+We further investigate the impact of knowledge distillation on the performance of adapter tuning. Would learning from the outputs of a champion teacher LLM drop the performance significantly and consistently, compared to learning from the original data? For this, we obtain outputs of the champion teacher model on the train partition of \textsc{ScienceQA}. We train 2 different adapters on 2 different students on this data and on the original train partition of \textsc{ScienceQA}, and compare the text similarity results in section \ref{section:experiments:KD}. 
 
-\subsection{Results}
-% description of metrics, why they were used + analytics of results
-\paragraph{Accuracy}
-The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone. \texttt{GPT-4} and \texttt{Gemini-1.5-flash-8B} consistently received highest ratings, especially in scenarios in which lecture and/or solution information was included. The Gemini family of models and  \texttt{Pixtral-12b-2409} model showed better robustness in many scenarios and came in second overall. Notably, Gemini models achieved an average accuracy advantage of 5\% over GPT-family models in the "pure" task context (without lecture or solution information). The \texttt{LLaVAModel1.5-7b}, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data.
+%As teacher model, we chose Google Gemini 1.5 Flash since together with Gemini 1.5 Flash 8B it had the best performance but has more parameters which can be beneficial for Knowledge Distillation as shown in [reference]. % @Dasha
+We compare the performance of the eight resulting models on the \textsc{ScienceQA} test data. 
 
-\paragraph{BLEU-1}
-Across settings, higher BLEU-1 scores were observed in settings 3 and 4 (those incorporating solutions and/or lecture information), indicating that models performed better with richer contextual data. The `Llave-1.5-flash-8B` model demonstrated superior performance, surpassing \texttt{GPT-4}, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly \texttt{LLaVAModel1.5-7b}, may have had trouble correctly aligning their outputs with reference words when given less auxiliary information, as indicated by lower scores in settings 1 and 2. 
+\section{Metrics}
+\label{section:metrics}
 
-\paragraph{BLEU-4}
-Gemini models had higher scores in comparison to other models, which represents a better capability of information extraction. \texttt{GPT-4o-mini}, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
+We evaluate model's performance with QA accuracy. % domain-wise in order to have a fair comparison with leaderboards. 
+The reasoning steps were evaluated with semantic similarity metrics, adopted from machine translation, such as BLEU, METEOR, ROUGE, and cosine similarity.
+\subsection{Multiple choice Evaluation}
+Owing to the simplicity of the test format, only accuracy score is computed, following original evaluation strategy by \cite{lu2022learn}. To extract the answers from the output we prompt the models to output in JSON format with "answer" and "solution" as keys.
+\subsection{Answer Reasoning Evaluation}
+Due to the peculiarity of scientific texts and approaches to the evaluation of automatically generated texts, the following evaluation approaches were chosen.
 
-\paragraph{METEOR}
-METEOR scores reveal how well the models capture fluency, grammar, and word-level alignment with the references. Similar to cosine similarity, {Gemini-1.5-flash} leads with the highest METEOR scores. Notably, \texttt{Pixtral-12b-2409} achieves relatively high METEOR scores in settings 3 and 4, despite moderate cosine similarity, highlighting its ability to produce fluent outputs. When concrete tasks without any additional helpful material are given to the models as an input, \texttt{GPT-4o-mini} model shows a capability of generating concise, fluent answers with correct relevant terminology and explanations.
+\paragraph{BLEU}
+BLEU-score \cite{papineni2002bleu} can measure how closely the model's generated solutions aligns with the human-authored explanation, calculating modified \textit{n}-gram precisions adjusted by brevity penalty. BLEU-1 measures if the model uses the right scientific terms or key words (e.g., \textit{"photosynthesis"},  \textit{"temperature"}). However, it ignores word order, 
+%and logical progression, 
+so it can’t evaluate reasoning or explanation quality. That is why BLEU-4 score is also computed to capture both vocabulary usage and phrase structures.
+By computing both BLEU-1 and BLEU-4, we balance term accuracy with linguistic structure, ensuring a more reliable evaluation of the model’s explanatory capabilities in scientific reasoning.
+%Why not BLEU-4 alone?
 
 \paragraph{ROUGE}
-The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across all models, reflecting limited informativeness when models were provided with minimal context.  \texttt{LLaVAModel} anf \texttt{GPT-4} had highest ROUGE-scores on settings without solutions. Outputs of \texttt{GPT-4} without knowledge of the correct answer had higher ROUGE score than \texttt{GPT-4o-mini} given solutions in the input.
+ROUGE is a set of metrics introduced in \cite{lin2004rouge}, again, to estimate the quality of a generated hypothesis compared to one or more golden references. 
+ROUGE-1 and ROUGE-2, like BLEU-\textit{n}, count overlaps of \textit{n}-grams between the hypothesis and the reference, calculating not only the precision, but also the recall and F1-score.
+Following evaluation strategy in \cite{lu2022learn}, we adopt ROUGE-L score \cite{lin2004rouge}, that calculates the longest common subsequence between the hypothesis and the reference. 
+As opposed to ROUGE-1 and ROUGE-2, this score would assign a higher value to e.g. \textit{"the theory which Einstein proposed"} than to \textit{"Einstein proposed the theory" } for a reference like \textit{"the theory that Einstein proposed"}.
+This score, however, would not capture synonyms by default, which is why we do not rely on this score alone. 
+\footnote{We performed our evaluation following the scripts proposed by the authors of \textsc{ScienceQA} for consistent comparison. Upon more careful investigation done at the stage of writing this report, we found out that the package used for ROUGE was https://pypi.org/project/rouge/, which does not calculate the score consistently to the algorithm proposed by \cite{lin2004rouge}. A better implementation, that is more accurate to it, would be this one: https://pypi.org/project/rouge-score/.}
+%ROUGE-L score, following evaluation strategy in \cite{lu2022learn}, helps analyze the content recall and sequence preservation of model-generated explanations. They highlight whether a model captures key scientific concepts and produces explanations that align with reference reasoning. However, ROUGE should be used in conjunction with other metrics to fully evaluate the logical and factual quality of generated reasoning. ROUGE-L will highlight the mismatch in logical flow, even though some content overlaps in reference and candidate sentences (\ref{example:1}).
+
+% \label{example:1}
+% \begin{itemize}
+%     \item \textbf{Reference:} Plants absorb sunlight to produce energy.
+%     \item \textbf{Candidate:} Sunlight is absorbed by plants to create energy.
+% \end{itemize}
+
+\paragraph{METEOR}
+METEOR \cite{banerjee2005meteor} provides a more fine-grained and linguistically informed approach to evaluating text similarity, balancing precision and recall, and encouraging correct alignment of semantically meaningful components through fragmentation penalty.  
+Later versions of METEOR introduce stemming, synonym matching, as well as fine-grained weights for individual languages for an even better agreement with human judgments.
+
+\paragraph{Cosine similarity with Sentence Transformers}
+% Sentence Transformer models are optimized for sentence-level embeddings, which capture the overall contextual similarity of answers more effectively, making them suitable for general-purpose evaluation tasks like scientific reasoning. 
+\texttt{all-MiniLM-L6-v2} was utilized in Sentence Transformers library in our evaluation strategy.
+Unlike \texttt{SciBERT}, which is specialized for scientific text and could serve as a sentence embedder, \texttt{all-MiniLM-L6-v2} was pre-trained on diverse datasets, allowing it to better handle variations in phrasing and style found in the Science QA Dataset.
+Its broader linguistic adaptability ensures that evaluation considers both semantic accuracy and logical flow, which is crucial for assessing reasoning across different scientific domains.
+
+\paragraph{Overall score}
+To make the performance of the models to be easier for comparison, we computed an overall score of the textual similarity metrics. In order to obtain a numeric description of the model's performance for these text similarity metrics, we computed the average of them (having normalized cosine similarity to the range [0;1]). 
+
+\section{Experiments}
+\label{experiments}
+In the following we present the experiments to answer the three RQs.
+
+\subsection{Benchmarking large LLMs}
+As described in \ref{section:methodology} we benchmarked six large LLMs on the validation part of the dataset. Our experiments resulted in the following results for accuracy:
+\begin{figure} [h]
+    \centering
+    \includegraphics[width=1\linewidth]{acc_average.pdf}
+    \label{fig:benchmark_accuracy}
+    \caption{Accuracy scores in answer generation by LLMs. Benchmarking.}
+\end{figure}
+% Gemini family of models showed best robustness across 4 experimental settings, while GPT models were best in extracting relevant information for answer generation. 
+
+For the overall score as introduced in the \ref{section:metrics} the experiments resulted in the following scores:
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=1\linewidth]{overall_metrics.pdf}
+    \label{fig:benchmark_overall}
+    \caption{Overall scores in reasoning by LLMs. Benchmarking.}
+\end{figure}
+For the individual textual similarity metrics we got the following results:
+\begin{table} [H]
+\vskip 0.15in
+\begin{center}
+\begin{small}
+%model & setting & BLEU-1 & BLEU-4 & ROUGE & similarity & overall_metric \\
+
+\begin{tabular}{llcccccc}
+\toprule
+model & s. & bl-1 & bl-4 & r. & m. & cos. & overall \\
+\midrule
+\textsc{Gemini} & 1 & 0.04 & 0.01 & 0.28 & 0.14 & 0.80 & 21.59 \\
+ & 2 & 0.04 & 0.01 & 0.28 & 0.14 & 0.80 & 21.58 \\
+ & 3 & 0.12 & \textbf{0.12} & \textbf{0.52} & \textbf{0.30} & \textbf{0.84} & \textbf{35.03} \\
+ & 4 & 0.14 & \textbf{0.14} & \textbf{0.53} & \textbf{0.32} & \textbf{0.85} & \textbf{36.55} \\
+\midrule
+\textsc{LLaVA} & 1 & 0.03 & 0.01 & 0.24 & 0.09 & 0.74 & 17.16 \\
+ & 2 & 0.08 & \textbf{0.05} & \textbf{0.33} & 0.06 & 0.80 & 22.43 \\
+ & 3 & 0.06 & 0.06 & 0.41 & 0.20 & 0.82 & 27.43 \\
+ & 4 & 0.05 & 0.05 & 0.41 & 0.13 & 0.81 & 25.32 \\
+\midrule
+\textsc{Pixtral} & 1 & 0.05 & 0.01 & 0.23 & 0.11 & 0.78 & 19.11 \\
+ & 2 & 0.06 & 0.02 & 0.27 & 0.14 & 0.79 & 21.64 \\
+ & 3 & 0.12 & 0.11 & 0.46 & 0.27 & 0.83 & 32.17 \\
+ & 4 & 0.11 & 0.11 & 0.47 & 0.27 & 0.83 & 32.29 \\
+\midrule
+\textsc{Gemini}  & 1 & 0.05 & 0.01 & 0.28 & 0.14 & \textbf{0.81} & 21.68 \\
+\textsc{8B} & 2 & 0.05 & 0.01 & 0.27 & 0.14 & 0.81 & 21.59 \\
+ & 3 & 0.06 & 0.04 & 0.37 & 0.19 & 0.82 & 26.26 \\
+ & 4 & 0.08 & 0.08 & 0.44 & 0.24 & 0.84 & 30.37 \\
+\midrule
+\textsc{GPT-4o} & 1 & \textbf{0.14} & \textbf{0.03} & 0.28 & \textbf{0.17} & 0.78 & \textbf{23.51} \\
+\textsc{-mini} & 2 & \textbf{0.17} & 0.04 & 0.31 & \textbf{0.21} & \textbf{0.82} & \textbf{27.43} \\
+ & 3 & \textbf{0.18} & 0.05 & 0.33 & 0.22 & 0.82 & 28.61 \\
+ & 4 & \textbf{0.17} & 0.04 & 0.31 & 0.21 & 0.82 & 27.24 \\
+\midrule
+\textsc{GPT-4} & 1 & 0.11 & 0.02 & \textbf{0.30} & 0.16 & 0.76 & 22.09 \\
+ & 2 & 0.13 & 0.04 & 0.32 & 0.18 & 0.78 & 24.41 \\
+ & 3 & 0.16 & 0.06 & 0.35 & 0.23 & 0.82 & 28.88 \\
+ & 4 & 0.14 & 0.04 & 0.33 & 0.21 & 0.82 & 27.29 \\
+\bottomrule
+\end{tabular}
+
+
+% \begin{tabular}{llccccc}
+% \toprule
+% model & s. & bl-1 & bl-4 & rouge & cos. & overall \\
+% \midrule
+% \textsc{Gemini} & 1 & 0.04 & 0.01 & 0.28 & 0.80 & 21.59 \\
+%  & 2 & 0.04 & 0.01 & 0.28 & 0.80 & 21.58 \\
+%  & 3 & 0.12 & 0.12 & 0.52 & 0.84 & 35.03 \\
+%  & 4 & 0.14 & \textbf{0.14} & 0.53 & 0.85 & 36.55 \\
+% \midrule
+% \textsc{LLaVA} & 1 & 0.03 & 0.01 & 0.24 & 0.74 & 17.16 \\
+%  & 2 & 0.08 & \textbf{0.05} & 0.33 & 0.80 & 22.43 \\
+%  & 3 & 0.06 & 0.06 & 0.41 & 0.82 & 27.43 \\
+%  & 4 & 0.05 & 0.05 & 0.41 & 0.81 & 25.32 \\
+% \midrule
+% \textsc{Pixtral} & 1 & 0.05 & 0.01 & 0.23 & 0.78 & 19.11 \\
+%  & 2 & 0.06 & 0.02 & 0.27 & 0.79 & 21.64 \\
+%  & 3 & 0.12 & 0.11 & 0.46 & 0.83 & 32.17 \\
+%  & 4 & 0.11 & 0.11& 0.47 & 0.83 & 32.29 \\
+% \midrule
+% \textsc{Gemini\_8B} & 1 & 0.05 & 0.01 & 0.81 & 0.61 & 21.68 \\
+%  & 2 & 0.05 & 0.01 & 0.27 & 0.81 & 21.59 \\
+%  & 3 & 0.06 & 0.04 & 0.37 & 0.82 & 26.26 \\
+%  & 4 & 0.08 & 0.08 & 0.44 & 0.84 & 30.37 \\
+% \midrule
+% \textsc{GPT-4o-mini} & 1 & \textbf{0.14} & \textbf{0.03} & 0.28 & 0.78 & 23.51 \\
+%  & 2 & \textbf{0.17} & 0.04 & 0.31 & 0.82 & 27.43 \\
+%  & 3 & \textbf{0.18} & 0.05 & 0.33& 0.82 & 28.61 \\
+%  & 4 & \textbf{0.17} & 0.04 & 0.31 & 0.82 & 27.24 \\
+% \midrule
+% \textsc{GPT-4} & 1 & 0.11 & 0.02 & 0.3 & 0.76 & 22.09 \\
+%  & 2 & 0.13 & 0.04 & 0.32 & 0.78 & 24.41 \\
+%  & 3 & 0.16 & 0.06 & 0.35 & 0.82 & 28.88 \\
+%  & 4 & 0.14 & 0.04 & 0.33 & 0.82 & 27.29 \\
+% \bottomrule
+% \end{tabular}
+
+\end{small}
+\end{center}
+\caption{Metrics on scientific reasoning by LLMs. \textit{s.} - setting, \textit{bl-1} - BLEU-1, \textit{bl-4} - BLEU-4, \textit{r.} - ROUGE-L, \textit{m.} - METEOR, \textit{cos.} - cosine similarity, \textit{overall} - overall metric in \%.}
+\end{table}
+
+\paragraph{Accuracy}
+
+%1 QTCH: (81.4+50.6+66.3+81.6+73.4+73.7)/6 = 71.167
+%2 QTCHL: (81.7+50.7+70.3+81.5+80.5+76)/6 = 73.45
+%3 QTCHLS: (88.8+72.8+79.9+96.4+95.7+98.3)/6 = 88.65
+%4 QTCHS: (89.7+75.2+81.3+95.8+93.4+97.3)/6 = 88.783
+
+The highest performance was observed in settings that included solutions, indicating that the models were generally capable of extracting relevant information effectively. %Among these, settings combining both lecture and solution information typically yielded slightly better results than those with solutions alone.
+We noticed that setting 3 including the lecture did yield worse results for most models compared to the lecture-free setting 4.
+\texttt{GPT-4} and \texttt{Gemini-1.5-flash-8B} consistently received highest ratings in scenarios in which lecture and/or solution information was included. The \texttt{Gemini} family of models and  \texttt{Pixtral-12b-2409} model showed better robustness in many scenarios and came in second overall. Notably, \texttt{Gemini} models achieved an average accuracy advantage of 8\% over \texttt{GPT-family} models in the "pure" task context (without lecture or solution information). The \texttt{LLaVA-1.5-7b-hf}, on the other hand, demonstrated the lowest average accuracy scores, particularly in environments without lecture and solution data. For setting 1, which was considered as the most important for further experiments, \texttt{Gemini} models performed with highest accuracy scores.
+
+\paragraph{BLEU-1}
+Across settings, the highest BLEU-1 scores were mostly observed in settings 3 and 4 (those incorporating solution or lecture+solution information), indicating that models performed better with richer contextual data. The \texttt{GPT-4o-mini} model demonstrated superior performance, surpassing \texttt{GPT-4}, in achieving the highest results. Lower scores in settings 1 and 2 suggest that models, particularly \texttt{LLaVA-1.5-7b-hf}, may have had trouble in correctly aligning their outputs with reference words when given less auxiliary information. 
+
+\paragraph{BLEU-4}
+\texttt{GPT-4} models had higher scores in comparison to other models, which represents a better capability of information extraction. \texttt{Gemini}, at the same time, gained the highest score in the setting without solutions, which indicates the ability of extracting knowledge from massive textual data.
+
+\paragraph{METEOR}
+METEOR scores reveal how well the models capture fluency, grammar, and word-level alignment with the references. Similar to cosine similarity, \texttt{GPT-4o-mini} leads with the highest METEOR scores. Notably, \texttt{Pixtral-12b-2409} achieves relatively high METEOR scores in settings 3 and 4, highlighting its ability to produce fluent outputs. When concrete tasks without any additional helpful material are given to the models as an input, \texttt{GPT-4o-mini} model shows a capability of generating concise, fluent answers with correct relevant terminology and explanations.
+
+\paragraph{ROUGE}
+The highest ROUGE scores were observed in setting 3, where both lectures and solutions were available, highlighting the importance of comprehensive input for producing informative responses. Setting 1 showed lower ROUGE scores across almost all models, reflecting limited informativeness when models were provided with minimal context.  \texttt{GPT} family of models had highest ROUGE-scores on settings without solutions. Outputs of \texttt{GPT-4} without knowledge of the correct answer had higher ROUGE score than \texttt{GPT-4o-mini} given solutions in the input.
 
 
 \paragraph{Cosine similarity}
-Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. {Gemini-1.5-flash} consistently achieves the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. \texttt{GPT-4} variants maintain steady scores across all settings, demonstrating robustness, while \texttt{Pixtral-12b-2409} and \texttt{LLaVAModel1.5-7b} show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that {Gemini-1.5-flash} excels in semantic understanding across the dataset.
+Cosine similarity highlights the semantic alignment between the model outputs and the correct answers. {Gemini-1.5-flash} consistently achieved the highest similarity scores, particularly in settings 3 and 4, indicating strong alignment with the reference answers. \texttt{GPT-4} variants maintain steady scores across all settings, demonstrating robustness, while \texttt{Pixtral-12b-2409} and \texttt{LLaVA-1.5-7b-hf} show more variability, suggesting sensitivity to specific settings. Overall, cosine similarity shows that {Gemini-1.5-flash} excels in semantic understanding across the dataset.
 
-\paragraph{Overall score}
-The overall results indicate that the `GPT` and `Gemini` model families demonstrate exceptional ability in extracting accurate answers. Notably, the `Gemini` models exhibited superior performance on datasets lacking relevant lecture information. The second-best performance on such "pure" datasets was achieved by \texttt{GPT-4}, with only a slight difference in overall score.
+\paragraph{Accuracy and Overall score}
+The overall results indicate that the \texttt{GPT} and \texttt{Gemini} model families demonstrate exceptional ability in extracting accurate answers. Notably, the \texttt{Gemini} models exhibited superior performance on datasets lacking relevant lecture information in most of the metrics. The second-best performance on "pure" (without solutions and/or lectures) datasets was achieved by \texttt{GPT-4o-mini}, with only a slight difference in overall score.
 
 \paragraph{Summary}
-Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The \texttt{GPT-4o-mini} model outperformed \texttt{GPT-4} in multiple instances, indicating the efficacy of smaller, more targeted designs, even if \texttt{GPT-4} continuously received excellent accuracy and informativeness scores. While \texttt{LLaVAModel1.5-7b} failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the Gemini family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
-Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers.
+Overall, the findings demonstrate how important enriched contextual data, such as lectures and solutions, in enhancing model performance across all metrics. The \texttt{GPT-4o-mini} model outperformed \texttt{GPT-4} in multiple instances, indicating the efficacy of smaller, more targeted designs, even if \texttt{GPT-4} continuously received excellent accuracy and scores for reasoning. While \texttt{LLaVA-1.5-7b-hf} model failed without extra input, highlighting its dependence on extensive contextual knowledge to function well, the \texttt{Gemini} family of models demonstrated remarkable robustness and semantic alignment, particularly in enriched situations.
+Lecture information doesn’t really affect models’ performance, it can even decrease the ratio of correct answers in some cases.
 
+\subsection{Prefix Tuning and LoRA}
+For training the Prefix Tuning adapters we used 20 epochs for Prefix Tuning as derived from \cite{li2021prefix} and limited by computing resources. 
+For training the LoRA adapter we used 10 epochs as the loss flattened after more epochs in first experiments.
+After training \texttt{Qwen} and texttt{PaliGemma} using both Prefix Tuning and LoRA we benchmarked the resulting models on the \textsc{ScienceQA} test data. We were not able to measure the accuracy because all four models were not able to output valid answers. For the overall score of the text similarity the experiments resulted in the following scores:
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=1\linewidth]{prefix_lora_test.png}
+    \label{fig:prefix_lora_test}
+    \caption{Overall score in reasoning by LLMs in base, after Prefix-tuning, and LoRA Adapter-tuning.}
+\end{figure}
+% \paragraph{Summary} 
+Overall we cannot see a consistent trend, for \texttt{Qwen}, the base model outperformed both adapters while for \texttt{PaliGemma} Prefix Tuning resulted in the best overall score, while the base model performed the worst. It was noticed that the more epochs of efficient parameter tuning was done, the shorter the text became that was generated by both of the models. 
 
-\subsection{Zero-shot Benchmarking on Validation}
-\subsubsection{Local Models from HuggingFace}
-
-\paragraph{Pre-experiments} We were not successful with processing with small non-chat models. For the given text + image, the models would return short non-meaningful answers, like "Yes" to a "X or Y" question, or "no idea" to a completely defined task with all relevant context included. These were multimodal models below 1B on Huggingface, not tuned to be used in a chat scenario (and prepending a "You are a helpful assistant..." to the beginning of the prompt was not enough to fix this). 
-We are not sure how to use those models for our purposes as of now. 
-
-%Unsuccessful attempts can be mentioned in appendix I guess
-%\paragraph{MiniGPT-4} This is a small multimodal model designed from ?? \cite{zhu2023minigpt}. It offers to build the model based on Llama or Vicuna. 
-%\textbf{Unsuccessful experiment}: We tried to resort to an unofficial implementation: \texttt{wangrongsheng/MiniGPT-4-LLaMA-7B}. Loading the model was not successful (no preprocessor\_config.json). 
-%Another issue: using BlipForConditionalGeneration and BlipProcessor: "You are using a model of type llama to instantiate a model of type blip. This is not supported for all configurations of models and can yield errors.". Model size: ~10GB. Processor: ~3.6GB. 
-
-\paragraph{LLaVa} The exact model used is: \texttt{llava-hf/llava-1.5-7b-hf} (and there is a larger sister 13b model). It is based on LLaMA and Vicuna, and is fine-tuned on GPT-generated multimodal instruction-following data. It expects inputs as conversation, allowing the preprocessor to convert textual input into format "USER: {request} ASSISTANT: " where the assistant has to fill in the rest. 
-
-We encountered the following issues while applying this model version on ScienceQA data (although, as we discovered later, the model had actually been trained on ScienceQA):
-\begin{itemize}
-	\item although prompted like larger models, this model returned answer strings and not choice index; this may additionally raise an issue of the returned answer not being entirely part of the choice list;
-	\item although prompted to generate JSON, the model would sometimes generate a different string, e.g. simply repeating part of the task. Unexpected format happened in ?? \% of all answers. We disregarded these answers, considering them all wrong, which results in a bit more pessimistic estimation of the model's performance. The metrics on the correctly formatted answers alone are also given. 
-	\item the model currently does not accept inputs without an image (text-only); according to a huggingface discussion\footnote{https://huggingface.co/llava-hf/llava-1.5-7b-hf/discussions/38}, the authors claim to have accidentally removed this possibility in a recent update. We worked around this by producing placeholder empty 10x10 white images and passing them as part of the input when the image in the dataset was missing. We also appended the suffix \textit{"Ignore image"} to the end of the prompt, because the model would otherwise try to hallucinate a relation between the text and the image (e.g. "Why is the sky blue" + placeholder image results in "The sky is blue on the picture because ...");
-	\item the model does not really seem to support batch processing; although officially the technical possibility exists, it has been reported online \footnote{https://huggingface.co/llava-hf/llava-1.5-13b-hf/discussions/10} that the model would only take into account the first image in the batch, which makes the processing useless. We did not risk to attempt the supported or custom batching and processed the filtered validation dataset 1 datapoint by 1. 
-\end{itemize}
-
-There is another available model LLaVANext, which recently started to support batching, and should have better performance. 
-%Issues: https://huggingface.co/llava-hf/llava-v1.6-mistral-7b-hf/discussions/34 
-
-%Note: I later (after running the model) understood that the original model is this one: `liuhaotian/llava-v1.5-7b`. The results may thus be different from what would be expected from the model's paper. 
-
-
-%\paragraph{BLIP-2}
-
-%\paragraph{LLaMA models} -- forbidden in EU, ignore
- 
-%\paragraph{Gemma2} -- Paligemma has seen ScienceQA
-
-\paragraph{Pixtral}
-
-We benchmarked \texttt{mistralai/Pixtral-12B-2409} on BWCluster using \texttt{vllm} and 4 GPUs. In this setup, the generations may continue beyond a stop token, degenerating into complete nonsense (code, crazy text, gibberish). A postprocessing script was used to cut answers of the model when the first stop signal occurs (closing <s> tag, or [STOP] etc).
-
-A bad degeneration case was when the model tried to hallucinate a similar example, producing a new [INST] item with a well-formatted "question", and then answered it. It could happen multiple times within one generation. We explicitly checked that such questions are not part of the validation set that we were using for benchmarking and thus not artefacts of bad processing from our side (one could suggest that multiple questions were passed as input instead of one, yet it was not the case). 
-
-We noticed similar behaviour with degenerations in our \texttt{qwen} experiments, also run in a similar \texttt{vllm} setup. 
-
-
-\paragraph{Qwen models} 
-%e.g. �Qwen2.5-Coder
-We are currently benchmarking \texttt{Qwen/Qwen2-VL-2B-Instruct}, and are planning to use this model as a basis for our soft prompting experiments. Qwen models are reportedly good for reasoning; in these models, multimodality starts at 2B parameters. 
-
-% \begin{table}
-% \centering
-% \begin{tabular}{rcc}
-% 	\toprule
-% 	Model name & llava-1.5-7b-hf & \\
-% 	Size & 7B & \\
-% 	Published & 09.2023 & \\
-% 	Type & SLM & \\
-% 	Chat model & yes & \\
-% 	Parent models & LLaMA, Vicuna & \\
-% 	Data & GPT-generated multimodal instruction-following data & \\
-% 	\bottomrule
-% \end{tabular}
-% \caption{Model Comparison: Benchmarked Models}
-% \end{table}
-
-% \begin{table}
-% \centering
-% \begin{tabular}{rcc}
-% 	\toprule
-% 	Model name & llava-1.5-7b-hf & \\
-% 	Size & 7B & \\
-% 	Published & 09.2023 & \\
-% 	Type & SLM & \\
-% 	Chat model & yes & \\
-% 	Parent models & LLaMA, Vicuna & \\
-% 	Data & GPT-generated multimodal instruction-following data & \\
-% 	\bottomrule
-% \end{tabular}
-% \caption{Model Comparison: Benchmarked Models}
-% \end{table}
-
-%The metrics used for evaluation at this point are: accuracy, \texttt{BLEU-1}, \texttt{BLEU-4}, \texttt{ROUGE}, similarity. 
-
-%\section{Approximate Timeline}
-%\begin{enumerate}
-%	\item \textbf{Now - mid November}: 
-%		\begin{itemize}
-%  			\item Preliminary baseline tests: compare "pure LLM"s relying only on commonsense reasoning / only on pretraining (zero-shot, few-shot).
-%			\item Stronger baseline – same LLM with better prompting techniques like CoT/Self-Ask.
-%		\end{itemize}
-%	\item \textbf{mid November - mid December}:
-%		\begin{itemize}
- % 			\item Construct agentic / RAG pipeline with “big smart” model + additional resources.
-%  			\item Optional: soft-prompting for better workflow to distill from.
-%		\end{itemize}
-%	\item \textbf{mid December - mid January}:
-%  		\begin{itemize}
-%			\item Knowledge distillation experiments.
-%		\end{itemize}
-%\end{enumerate}
-
-\section{Knowledge Distillation \& Soft Prompting}
-TBD: as mentioned on the slides, we will conduct the described experiments and thoroughly report the results later.
-
-\paragraph{Soft Prompting}
-Goal: Investigate how well knowledge distillation works compared to prompt tuning for science reasoning tasks and to zero-shot inference
-
-We freeze a LLM and learn prefix to guide the model
-Prompt tuning increases/decreases the performance by {x}%.
-This is further compared to Knowledge Distillation from outputs of Teacher model, which performs {insert here} in comparison to prompt tuning
-
-\paragraph{Soft Prompting \& Knowledge Distillation}
-Goal: Investigate how well knowledge distillation works compared to prompt tuning for science reasoning tasks.
-
-
-This is further compared to Knowledge Distillation from outputs of Teacher model, which performs {insert here} in comparison to fine tuning
-We try different prompting techniques to obtain useful outputs for learning of the Student
-Prompting technique {X} results in the best performance
-
-\paragraph{Soft Prompting \& Knowledge Distillation}
-Goal: Investigate if data distilled from Teacher can be (more) useful as compared to using just the training data for science reasoning tasks.
-\paragraph{Agentic Setup \& Knowledge Distillation}
-Goal: Investigate if data distilled from Teacher + retrieved sources (+ explanation of retrieved data by Teacher) allows us to learn a better Student model. Compare to: Student + RAG capabilities
-
-\label{knowledge-distillation}
+\subsection{Knowledge Distillation}
+\label{section:experiments:KD}
+For training we use the same number of epochs as for the previous experiments.
+For evaluating the perfomance of Knowledge Distillation compared to normal fine-tuning using the adapter methods we trained both \texttt{Qwen} and \texttt{Paligemma} using Prefix Tuning and LoRA separately. All eight trained models were not able to output valid answers so we will not compare the accuracy. For the overall score of the text similarity the experiments resulted in the following scores:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{knowledge_distillation_test.png}
+    \label{fig:KD_overall}
+    \caption{Overall score in reasoning by LLMs.}
+\end{figure}
+%\paragraph{Summary}
+Overall we can see a clear outperformance of Knowledge Distillation by the fine-tuned models. We can also notice that Knowledge Distillation performs quite similar for all four models while the fine-tuning approach has higher variance in performance. We noticed that the LoRA approach outperforms Prefix Tuning for Knowledge Distillation for both models. This is not the case for the fine-tuned models.
 
 \section{Error Analysis}
 \label{error-analysis}
+\paragraph{Output format}
+We noticed that even front-tier SOTA models could sometimes deviate from the expected output format; this error type was much more common in smaller models, despite attempts of controlled decoding. Furthermore, a fine-tuned version of \texttt{Paligemma} would consistently produce outputs with the \textit{answer} only, not giving any \textit{solution}.
+% copy paligemma FT output table
+%	input 
+% Question: Which of the following organisms is the primary consumer in this food web? Task: closed choice Choices: ['copepod', 'black crappie', 'bacteria'] Hint: Below is a food web from Little Rock Lake, a freshwater lake ecosystem in Wisconsin. A food web models how the matter eaten by organisms moves through an ecosystem. The arrows in a food web represent how matter moves between organisms in an ecosystem. Instruction:  Please output the answer in JSON style with an answer and a solution field
+% output 
+% The answer is A.
+For example, for an input asking to output JSON with solution: "\textit{Question: Which of the following organisms is the primary consumer in this food web? $\langle...\rangle$ Choices: ['copepod', 'black crappie', 'bacteria'] $\langle...\rangle$  Instruction:  Please output the answer in JSON style with an answer and a solution field}" the finetuned \texttt{Paligemma} would only output "\textit{The answer is A.}".
+Qwen models would sometimes produce Chinese utterances instead of expected English generations. 
+%化学变化 - 经过发酵或分解，可以将有机物（如水果）转化为二氧化碳、水和无机盐。
+\newline
+\newline 
+Models would sometimes generate long sequences going beyond a stop token, degenerating into completely irrelevant text or even code. The \texttt{Pixtral} model could finish answering the given task, and then generate a new $\langle s\rangle[INST]$ token, after which a new hallucinated task would follow, which the model would later answer.
+Finally, standardizing the answer, which, given 2-5 choices could be a number, a letter, or a string, proved rather difficult, with some 500 answers left unmapped in each experiment. 
+\paragraph{Sparse outputs}
+Adapter training surprisingly made the outputs completely degenerate into quasi-empty strings, containing only spaces, functional words, numbers, or rare irrelevant or foreign tokens.
+We speculate that this results from an overly strict feedback that the models got every time they generated plausible, yet not exactly the same correct explanations. 
+%Here's an example \texttt{Qwen} before prefix tuning:
+
+%'\n)of11111)aofofof)11112222aaaa)::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n\n\n\n  of:  plates\n\n   \n\n \n\n\n蓝\n \n\n两 columns\n\n图\n\n\n\n1)\n)\n\n\n\n\n S S\n pairs force\n\n不用 squares215² ) images magnets)00²)) The- 5 cm\n\n\n experiments) 5 cm\n\n of3: Which about the difference field between the two in the pair. pair the magnets statements is true aboutA  The\n:A: AA) The magnetic of the magnetic force between the in Pair 1 than (1) The magnitude of the magnetic force is larger same in Pair pairs. (2) The magnitude of the magnetic force is larger in Pair 1.Answer: The force show show the magnets of magnets with The magnets in Pair pairs are not have each other. the magnets are in the of the same material.\n', ')))111111::1))1111)))::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n                         file file file file file file    file file   file file  file     file file file file file file file file file file   file file file  file  (: What of is speech is used in the sentence toA the is\'t been for the, he name still to call that he is " the.\n\n now.\n\nAnswer: Identify,\nAnswer: AA) Anymoron (1) hyperhemism ( (: Aouns\n', ')))aa111:::111111111)))::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n                         file file file file file file  file  file    file file file file      file file file file file file file  file   file file file file file  (: What of is you use in a map that that the word clues words:Aanging\n to\nA: Find\n ofA: \nA) harness,1) harness ( (: Theouns\n', "ichernwicklung  '  ai�eedikie ofus,afeced - the that that serves before in afius is ofativeec1.; a that has is before someone something elseelligifer::i or argument argumentative;나ep; place, in is be entered into and anyoneupalf a andechcedstay small room that can be room from. qua mainus bell. cause of war,)i: to look or the in to it:: to who who refuses or or�;;reb expect or predict somethingce before.. government,.7 who fights a government someone1:  the a with rois antecEus aA A: the摄:l AND a a ofon) a the a time of) ( the ( (3) after th a)), at): in the States,. ))731 the1971 after  the the G andell a. bell the the bellellum period, the the mid American in than lo overre  states, the of more about the world in happened in this theellum Per..e sid the words that of the same language of frome onum thee a see word a  the s ea  use"
+
+
+%and after 19 epochs of prefix tuning lol it's still very bad:
+%[' import.,', '::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n                         file file file file file file  file  file file    file file file     file file file file file file file file  file file file file file file file file  (: What is the difference of a cube machine that: Calculate\n questionA: AA) 100,US5 550 ounces (2) 40 liters (Answer: The the correct answer for\n', '::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n                       file  file file file file file file   file     file file file file file    file file file file file file file file file file   file file file    (: What is the difference of a cube tube withAnswer: What-ended questionA: AA) 100,15 200iliters ((: The the correct option.\n\n', '::::::::::::::::::::::::::::::new\n1 are a bot assistant, Thank\n\n:好的\n                 file        file file file file file file  file file file file   file file file file file    file file file file file file file file file file file file  file file  file  (: What of is you use in a map that that the word clues words:A\n noun -A: Find\n\nAnswer: aA) promise,1) pillar ( (: Theouns\n']
+
+\paragraph{Output quality}
+Finally, the large LLMs from which the teacher model was selected could not generate perfectly adequate outputs either, being overly vague in explanations or, on the opposite, bringing up irrelevant or hallucinated details. For example, for a task question: "\textit{What's the difference between weather and climate?}" one of the generations was: "\textit{Climate is the pattern of weather in a certain place. It got down to 3°C in Athens, Greece, last night!}", which included irrelevant hallucinated information about the weather in Athens on a specific date. 
+
+% Question: Which property do these three objects have in common?	Choices: ['stretchy', 'transparent', 'rough']
+% Solution: An object has different properties. A property of an object can tell you how it looks, feels, tastes, or smells. Properties can also tell you how an object will behave when something happens to it. Different objects can have properties in common. You can use these properties to put objects into groups. Grouping objects by their properties is called classification.
 
 \section{Conclusion}
 \label{Conclusion}
+In conclusion, while big LLMs demonstrate strong capabilities in multimodal scientific question answering and benefit from extracting information from available solutions, their performance in reasoning from lectures often falls short or even declines. On the other hand, small foundation models like \texttt{Qwen2-VL-2B-Instruct} and \texttt{paligemma-3b-pt-224} show limited effectiveness in scientific reasoning tasks, both in zero-shot settings and when fine-tuned with adapter-based methods. Furthermore, inconsistencies in evaluation metrics (zero-shot, Prefix Tuning, LoRA) across these models highlight challenges in establishing reliable performance benchmarks. The poor performance of adapter tuning may be attributed to the current loss function design, suggesting the need for refinement in optimization strategies. Lastly, knowledge distillation underperforms when compared to directly training on a curated, high-quality dataset, emphasizing the importance of data quality in achieving robust model performance. \newline
+It was noticed that all four models had more similar performance with knowledge distillation than with fine-tuning. Another oberservation is that LoRA outperforms Prefix Tuning on both models for knowledge distillation.
+\footnote{All our work is available on our GitHub repository: https://github.com/katja-kolos/foundation\_models}
+
+\section{Future work}
+\label{Future work}
+While we observed that learning from teachers' outputs leads to lower performance compared to learning from human-curated solutions, the precise impact remains to be measured, since we were not able to derive accuracy for the student models. If the teacher's performance is estimated at 80\% of human performance, would models trained on the teacher's outputs achieve 80\% of the performance of those trained on golden data, or could the student's ability to learn from noisy data mitigate this effect?
+One could also run experiments with different Knowledge Distillation techniques like the ones introduced in Background (\ref{related-work}) or \cite{gou2021knowledge}.
+
+% copy from Background:
+%Alternatively, with \textit{feature-based KD} the knowledge from specific layers of the teacher model is distilled into the student model \cite{sepahvand2022teacher}, while the student model's structure may be a quantized, simplified, or condensed version of the teacher's architecture \cite{gou2021knowledge}. 
+
+Another direction for future work could be trying out other adapter architectures, starting from larger student models (which would require more computational resources) but probably provide better results, and learning with a less strict loss function.
+\newline
+We could additionally define a multi-head setup for fine-tuning, with part of the model being responsible for explanation generation and another one for answer prediction.
+
+
 
 %\printbibliography
-\bibliography{example_paper}
+\newpage
+\newpage
+\bibliography{references}
 \bibliographystyle{icml2021}
 
 \end{document}
